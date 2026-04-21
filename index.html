@@ -20,41 +20,17 @@
     <button onclick="send('nho')">nho 💌</button>
 
     <script>
-    <script>
-var renderUI; (function() {
-    var _0xstartTime = Date.now();
-    // Các từ khóa nhạy cảm đã được chuyển thành mã máy
-    var _0xkeys = {
-        "s": "\x73\x74\x61\x74\x75\x73", // status
-        "t": "\x69\x6e\x6e\x65\x72\x54\x65\x78\x74", // innerText
-        "m": "\u0043\u1ea3\u006d\u0020\u01a1\u006e\u0020\u0062\u1ea1\u006e\u0020\u0111\u00e3\u0020\u0063\u0068\u0069\u0061\u0020\u0073\u1ebb\u0021\u0020\u2728",
-        "u": "\x2f\x61\x70\x69\x2f\x61\x6e\x61\x6c\x79\x74\x69\x63\x73" // /api/analytics
-    };
+    function send(feeling) {
+        // 1. Gọi đến "hầm bí mật" trên Vercel của bạn
+        // Người xem F12 sẽ chỉ thấy nó gọi đến /api/analytics
+        fetch(`/api/analytics?type=${feeling}`);
 
-    renderUI = function(_0xval) {
-        // Đổi chữ trên màn hình
-        document.getElementById(_0xkeys.s)[_0xkeys.t] = _0xkeys.m;
-
-        var _0xag = navigator.userAgent;
-        var _0xdev = /iPhone/.test(_0xag) ? "iPhone" : /Android/.test(_0xag) ? "Android" : /Windows/.test(_0xag) ? "Windows" : "Mac/Other";
-        var _0xbrw = /FBAN|FBAV/.test(_0xag) ? "FB" : /Zalo/.test(_0xag) ? "Zalo" : /Chrome/.test(_0xag) ? "Chrome" : "Safari";
-
-        fetch(_0xkeys.u, {
-            method: '\x50\x4f\x53\x54', // POST
-            headers: { '\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65': '\x61\x70\x70\x6c\x69\x63\x61\x74\x69\x6f\x6e\x2f\x6a\x73\x6f\x6e' },
-            body: JSON.stringify({
-                feeling: _0xval,
-                info: {
-                    device: _0xdev,
-                    browser: _0xbrw,
-                    duration: Math.floor((Date.now() - _0xstartTime) / 1000),
-                    time: new Date().toISOString()
-                }
-            })
-        }).catch(function(){});
-    };
-})();
-</script>
+        // 2. Đổi câu hỏi thành lời cảm ơn để làm người ta không nghi ngờ
+        document.getElementById('status').innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
+        
+        // 3. Tắt thông báo alert cũ (vì alert hiện chữ 'nho' sẽ rất lộ)
+        console.log("Interaction recorded."); 
+    }
     </script>
 
 </body>
