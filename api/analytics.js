@@ -1,14 +1,31 @@
 export default async function handler(req, res) {
-    const { type } = req.query;
+    if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
+
+    const { feeling, info } = req.body;
     const token = process.env.TELEGRAM_TOKEN;
     const chatId = process.env.CHAT_ID;
 
-    const url = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent("Bí mật: Người ấy vừa chọn " + type)}`;
+    const message = `
+🔔 **THÔNG BÁO MỚI**
+----------------------------
+🎭 **Cảm xúc:** ${feeling.toUpperCase()}
+📱 **Loại máy:** ${info.device}
+⏱️ **Thời gian ở lại:** ${info.duration} giây
+⏰ **Lúc nhấn:** ${new Date(info.time).toLocaleString('vi-VN')}
+----------------------------`;
 
     try {
-        await fetch(url);
-        res.status(200).json({ status: "xong" });
+        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: message,
+                parse_mode: "Markdown"
+            })
+        });
+        return res.status(200).json({ status: "ok" });
     } catch (e) {
-        res.status(500).json({ status: "lỗi" });
+        return res.status(500).json({ status: "error" });
     }
 }
