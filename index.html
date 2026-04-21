@@ -5,39 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi chút tâm tình</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding-top: 100px; background-color: #f9f9f9; }
-        button { margin: 10px; padding: 15px 30px; cursor: pointer; border-radius: 25px; border: 1px solid #eee; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; transition: 0.5s; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            padding-top: 100px; 
+            background-color: #fcfcfc; 
+            color: #333;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        h2 { margin-bottom: 30px; transition: 0.5s; font-weight: 400; }
+        .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        button { 
+            padding: 15px 25px; 
+            cursor: pointer; 
+            border-radius: 30px; 
+            border: 1px solid #eee; 
+            background: white; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02); 
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+        button:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08); 
+            background: #fafafa;
+        }
+        #status-msg { margin-top: 20px; color: #888; font-size: 14px; min-height: 20px; }
     </style>
 </head>
 <body>
 
-    <h2 id="s_id">Hôm nay bạn thế nào?</h2>
+    <div class="container">
+        <h2 id="main-title">Hôm nay bạn thế nào?</h2>
 
-    <button onclick="_log('tired')">tired 😔</button>
-    <button onclick="_log('sad')">sad 😢</button>
-    <button onclick="_log('lonely')">lonely 🫥</button>
-    <button onclick="_log('nho')">nho 💌</button>
+        <div class="btn-group">
+            <button onclick="_x('tired')">tired 😔</button>
+            <button onclick="_x('sad')">sad 😢</button>
+            <button onclick="_x('lonely')">lonely 🫥</button>
+            <button onclick="_x('nho')">nho 💌</button>
+        </div>
+
+        <div id="status-msg"></div>
+    </div>
 
     <script>
-    // Ghi lại lúc vừa mở trang (tên biến vô nghĩa để giấu mục đích)
-    const _t = Date.now();
+        // 1. Ghi lại thời điểm bắt đầu vào trang
+        const _start = Date.now();
 
-    function _log(v) {
-        // p = tham số nội dung, d = thời gian xem trang (miligiây)
-        // Người dùng F12 chỉ thấy gọi đến một địa chỉ nội bộ: /api/analytics?p=nho&d=5400
-        fetch(`/api/analytics?p=${v}&d=${Date.now() - _t}`);
+        /**
+         * Hàm gửi dữ liệu bảo mật (Mã hóa Base64)
+         * F12 chỉ thấy gửi một chuỗi rác qua POST tới /api/analytics
+         */
+        function _push(data) {
+            try {
+                const payload = btoa(JSON.stringify(data));
+                fetch('/api/analytics', {
+                    method: 'POST',
+                    body: payload
+                });
+            } catch (e) {}
+        }
 
-        // Thay đổi thông báo trên màn hình
-        const s = document.getElementById('s_id');
-        s.style.opacity = 0;
-        setTimeout(() => {
-            s.innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
-            s.style.opacity = 1;
-        }, 300);
-    }
+        /**
+         * Hàm xử lý khi người dùng nhấn nút
+         */
+        function _x(val) {
+            // Gửi dữ liệu: hành động (a) và thời gian (t)
+            _push({ a: val, t: Date.now() - _start });
+
+            // Cập nhật giao diện nhẹ nhàng
+            const title = document.getElementById('main-title');
+            title.style.opacity = 0;
+            setTimeout(() => {
+                title.innerText = "Cảm ơn bạn đã chia sẻ! ✨";
+                title.style.opacity = 1;
+            }, 300);
+            
+            // Ẩn các nút sau khi chọn để trông chuyên nghiệp
+            document.querySelector('.btn-group').style.display = 'none';
+        }
+
+        /**
+         * Bắt sự kiện thoát trang hoặc đóng tab
+         * Sử dụng visibilitychange - cách chính xác nhất hiện nay
+    
+                }
+            }
+        });
     </script>
-
 </body>
 </html>
