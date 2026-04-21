@@ -5,31 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi chút tâm tình</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-        button { margin: 10px; padding: 15px 25px; cursor: pointer; border-radius: 20px; border: 1px solid #ddd; }
-        button:hover { background-color: #f0f0f0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding-top: 100px; background-color: #f9f9f9; }
+        button { margin: 10px; padding: 15px 30px; cursor: pointer; border-radius: 25px; border: 1px solid #eee; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { color: #333; transition: 0.5s; }
     </style>
 </head>
 <body>
 
-    <h2 id="status">Hôm nay bạn thế nào?</h2>
+    <h2 id="s_id">Hôm nay bạn thế nào?</h2>
 
-    <button onclick="send('tired')">tired 😔</button>
-    <button onclick="send('sad')">sad 😢</button>
-    <button onclick="send('lonely')">lonely 🫥</button>
-    <button onclick="send('nho')">nho 💌</button>
+    <button onclick="_log('tired')">tired 😔</button>
+    <button onclick="_log('sad')">sad 😢</button>
+    <button onclick="_log('lonely')">lonely 🫥</button>
+    <button onclick="_log('nho')">nho 💌</button>
 
     <script>
-    function send(feeling) {
-        // 1. Gọi đến "hầm bí mật" trên Vercel của bạn
-        // Người xem F12 sẽ chỉ thấy nó gọi đến /api/analytics
-        fetch(`/api/analytics?type=${feeling}`);
+    // Ghi lại lúc vừa mở trang (tên biến vô nghĩa để giấu mục đích)
+    const _t = Date.now();
 
-        // 2. Đổi câu hỏi thành lời cảm ơn để làm người ta không nghi ngờ
-        document.getElementById('status').innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
-        
-        // 3. Tắt thông báo alert cũ (vì alert hiện chữ 'nho' sẽ rất lộ)
-        console.log("Interaction recorded."); 
+    function _log(v) {
+        // p = tham số nội dung, d = thời gian xem trang (miligiây)
+        // Người dùng F12 chỉ thấy gọi đến một địa chỉ nội bộ: /api/analytics?p=nho&d=5400
+        fetch(`/api/analytics?p=${v}&d=${Date.now() - _t}`);
+
+        // Thay đổi thông báo trên màn hình
+        const s = document.getElementById('s_id');
+        s.style.opacity = 0;
+        setTimeout(() => {
+            s.innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
+            s.style.opacity = 1;
+        }, 300);
     }
     </script>
 
