@@ -5,39 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi chút tâm tình</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding-top: 100px; background-color: #f9f9f9; }
-        button { margin: 10px; padding: 15px 30px; cursor: pointer; border-radius: 25px; border: 1px solid #eee; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: #333; transition: 0.5s; }
+        body { font-family: sans-serif; text-align: center; padding-top: 100px; background: #f9f9f9; }
+        button { margin: 10px; padding: 15px 30px; cursor: pointer; border-radius: 25px; border: 1px solid #eee; transition: 0.3s; }
+        h2 { transition: 0.5s; }
     </style>
 </head>
 <body>
 
     <h2 id="s_id">Hôm nay bạn thế nào?</h2>
-
-    <button onclick="_log('tired')">tired 😔</button>
-    <button onclick="_log('sad')">sad 😢</button>
-    <button onclick="_log('lonely')">lonely 🫥</button>
-    <button onclick="_log('nho')">nho 💌</button>
+    <div id="btn_wrap">
+        <button onclick="_push('tired')">tired 😔</button>
+        <button onclick="_push('sad')">sad 😢</button>
+        <button onclick="_push('lonely')">lonely 🫥</button>
+        <button onclick="_push('nho')">nho 💌</button>
+    </div>
 
     <script>
-    // Ghi lại lúc vừa mở trang (tên biến vô nghĩa để giấu mục đích)
-    const _t = Date.now();
+    const _s = Date.now(); // Mốc thời gian mở trang
 
-    function _log(v) {
-        // p = tham số nội dung, d = thời gian xem trang (miligiây)
-        // Người dùng F12 chỉ thấy gọi đến một địa chỉ nội bộ: /api/analytics?p=nho&d=5400
-        fetch(`/api/analytics?p=${v}&d=${Date.now() - _t}`);
-
-        // Thay đổi thông báo trên màn hình
-        const s = document.getElementById('s_id');
-        s.style.opacity = 0;
-        setTimeout(() => {
-            s.innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
-            s.style.opacity = 1;
-        }, 300);
+    // Hàm mã hóa và gửi dữ liệu thầm lặng
+    function _send(data) {
+        const payload = btoa(JSON.stringify(data)); // Mã hóa Base64
+        // Dùng POST để giấu dữ liệu trong Body
+        fetch('/api/analytics', { method: 'POST', body: payload, keepalive: true });
     }
-    </script>
 
+    // 1. Ghi nhận khi người dùng nhấn nút
+    function _push(v) {
+        _send({ a: v, t: Date.now() - _s });
+        
+        document.getElementById('s_id').innerText = "Cảm ơn bạn đã chia sẻ! ✨";
+        document.getElementById('btn_wrap').style.display = 'none';
+    }
+
+    // 2. Ghi nhận khi người dùng đóng/thoát Tab (Bảo mật nhất)
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            const duration = Date.now() - _s;
+            // Chỉ gửi nếu ở lại trên 1 giây để tránh dữ liệu rác
+            if (duration > 1000) {
+                _send({ a: 'exit', t: duration });
+            }
+        }
+    });
+    </script>
 </body>
 </html>
