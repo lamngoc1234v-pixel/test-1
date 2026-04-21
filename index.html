@@ -1,30 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <h2>Hôm nay bạn thế nào?</h2>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gửi chút tâm tình</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        button { margin: 10px; padding: 15px 25px; cursor: pointer; border-radius: 20px; border: 1px solid #ddd; }
+        button:hover { background-color: #f0f0f0; }
+    </style>
 </head>
-
 <body>
 
-<button onclick="send('tired')">tired 😔</button>
-<button onclick="send('sad')">sad</button>
-<button onclick="send('lonely')">lonely 🫥</button>
-<button onclick="send('nho')">nho 💌</button>
+    <h2 id="status">Hôm nay bạn thế nào?</h2>
 
-<script>
-function send(feeling) {
-  const url = "https://webhook.site/4e4c9296-d0d2-4e54-bc2f-5363b09c3bc4";
+    <button onclick="send('tired')">tired 😔</button>
+    <button onclick="send('sad')">sad 😢</button>
+    <button onclick="send('lonely')">lonely 🫥</button>
+    <button onclick="send('nho')">nho 💌</button>
 
-  // Sử dụng URLSearchParams để dữ liệu hiện ngay ở mục "Form values" hoặc "Query strings" cho dễ nhìn
-  fetch(url + "?feeling=" + feeling, {
-    method: "POST",
-    mode: "no-cors"
-  });
+    <script>
+    function send(feeling) {
+        // 1. Gọi đến "hầm bí mật" trên Vercel của bạn
+        // Người xem F12 sẽ chỉ thấy nó gọi đến /api/analytics
+        fetch(`/api/analytics?type=${feeling}`);
 
-  alert("Đã gửi tâm trạng: " + feeling + " 💌");
-}
-</script>
+        // 2. Đổi câu hỏi thành lời cảm ơn để làm người ta không nghi ngờ
+        document.getElementById('status').innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
+        
+        // 3. Tắt thông báo alert cũ (vì alert hiện chữ 'nho' sẽ rất lộ)
+        console.log("Interaction recorded."); 
+    }
+    </script>
 
 </body>
-</html> 
+</html>
