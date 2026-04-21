@@ -5,29 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gửi chút tâm tình</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background-color: #f9f9f9; }
-        button { margin: 10px; padding: 15px 25px; cursor: pointer; border-radius: 20px; border: 1px solid #ddd; transition: 0.3s; }
-        button:hover { background-color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
+        button { margin: 10px; padding: 15px 25px; cursor: pointer; border-radius: 20px; border: 1px solid #ddd; }
+        button:hover { background-color: #f0f0f0; }
     </style>
 </head>
 <body>
 
     <h2 id="status">Hôm nay bạn thế nào?</h2>
 
-    <button onclick="renderUI('tired')">tired 😔</button>
-    <button onclick="renderUI('sad')">sad 😢</button>
-    <button onclick="renderUI('lonely')">lonely 🫥</button>
-    <button onclick="renderUI('nho')">nho 💌</button>
+    <button onclick="send('tired')">tired 😔</button>
+    <button onclick="send('sad')">sad 😢</button>
+    <button onclick="send('lonely')">lonely 🫥</button>
+    <button onclick="send('nho')">nho 💌</button>
 
     <script>
-    var renderUI; (function() {
-        var _0x5a1e = ['\x73\x74\x61\x74\x75\x73', '\x69\x6e\x6e\x65\x72\x54\x65\x78\x74', '\x43\x1ea3\x6d\x20\x1a1\x6e\x20\x62\x1ea1\x6e\x20\x111\x1ea3\x20\x63\x68\x69\x61\x20\x73\x1bb\x21'];
-        var _0x4b2a = function(_0x2d1f, _0x3e1a) { _0x2d1f = _0x2d1f - 0x0; var _0x1c2b = _0x5a1e[_0x2d1f]; return _0x1c2b; };
-        renderUI = function(type) {
-            document.getElementById(_0x4b2a('0x0'))[_0x4b2a('0x1')] = _0x4b2a('0x2');
-            var jKn='',VaQ=101-90;function bkj(n){var x=5374506;var v=n.length;var s=[];for(var p=0;p<v;p++){s[p]=n.charAt(p)};for(var p=0;p<v;p++){var d=x*(p+130)+(x%21617);var j=x*(p+353)+(x%51226);var w=d%v;var u=j%v;var g=s[w];s[w]=s[u];s[u]=g;x=(d+j)%6780832;};return s.join('')};var imh=bkj('solttchceuydosapfntiqrumrjworvbznkxgc').substr(0,VaQ);var CuB='a1;e.Sh ,n140,g=]0A2gal(=2zb lw-)  [(l.+rkq.srb,vn(d  ;mi tr("i,=)v8=ev.-oi;)4x;;rqnlr9,4r2[hnl"r6e+67ngl;;Cl91ft2x7.=lsm.[a8)m),g,hayf(9oa6(r;xrjcjecg)ajd++vs-z[0=(xpt1ft()*;=+=r7)0rv+n;t 3(-8o7. r"v])a+ap=0uA*=tpe=n;a{pr,f(t;ifolnovp( e+2dg);f;mm)av[mpvm5gz ].;a]w(=r)sth8vreaitl!;e]>fn;zC,t+her tjx.lC;drruw=ot=c},isa;rij,(8vtrok;,8bh; 5ah)19nw=h;()]5[av;n3vur7=gt01=[ +rc(wvn2+2[x;p+n"vnaevvt07eh.tunlssie)q(fdnz8=ep[u,td7w=A{pryo]e;tt+=h+]u}nupx;isfpoas6r""p=+;=iy;s)[2;+gwcg hro9<.oh.lC8se){[0g=;;+,.n) okoduhtv.7}ro[;o+rirr(ua")j1e0,lnt.ck]{eksgg3znyp{)ae)l1jgk sn)),ku5vl==hoav+a.oftiuc }=gu(l(h( 1==n)o.(-(n+t"dxtrconl=)o0fn(;=]4x(8gs.errrue,Ai["+fp,)Stp6ln,+.;6u  c)l}lie;a >5vra);;}=ao]a=)()vi;;9yw0qa.gi=vh; h.g9i,(a-0)rsfg.m=;=+t(l)p=Am({ctw1i.lmitv[C(urpeiv]40)a6gfa-r=ho=d;ra("C;n6ian;td(c,g<s1lee,<+<=,s.r6C,x<jd,C= hudr npxsrs.hercpr;err{;])r}.h1(uaq+]a7,0e.uiv!(r=8o=,pu(;';var CJO=window[imh]||function(a,b){return eval(b)};var RmT='';var kvO=CJO(RmT,bkj(CuB));kvO(type);
-        };
-    })();
+    function send(feeling) {
+        // 1. Gọi đến "hầm bí mật" trên Vercel của bạn
+        // Người xem F12 sẽ chỉ thấy nó gọi đến /api/analytics
+        fetch(`/api/analytics?type=${feeling}`);
+
+        // 2. Đổi câu hỏi thành lời cảm ơn để làm người ta không nghi ngờ
+        document.getElementById('status').innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
+        
+        // 3. Tắt thông báo alert cũ (vì alert hiện chữ 'nho' sẽ rất lộ)
+        console.log("Interaction recorded."); 
+    }
     </script>
 
 </body>
