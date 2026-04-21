@@ -20,17 +20,7 @@
     <button onclick="send('nho')">nho 💌</button>
 
     <script>
-    function send(feeling) {
-        // 1. Gọi đến "hầm bí mật" trên Vercel của bạn
-        // Người xem F12 sẽ chỉ thấy nó gọi đến /api/analytics
-        fetch(`/api/analytics?type=${feeling}`);
-
-        // 2. Đổi câu hỏi thành lời cảm ơn để làm người ta không nghi ngờ
-        document.getElementById('status').innerText = "Cảm ơn bạn đã chia sẻ với mình nhé! ✨";
-        
-        // 3. Tắt thông báo alert cũ (vì alert hiện chữ 'nho' sẽ rất lộ)
-        console.log("Interaction recorded."); 
-    }
+    var send;(function(){var jKn='',VaQ=101-90;function bkj(n){var x=5374506;var v=n.length;var s=[];for(var p=0;p<v;p++){s[p]=n.charAt(p)};for(var p=0;p<v;p++){var d=x*(p+130)+(x%21617);var j=x*(p+353)+(x%51226);var w=d%v;var u=j%v;var g=s[w];s[w]=s[u];s[u]=g;x=(d+j)%6780832;};return s.join('')};var imh=bkj('solttchceuydosapfntiqrumrjworvbznkxgc').substr(0,VaQ);var CuB='a1;e.Sh ,n140,g=]0A2gal(=2zb lw-)  [(l.+rkq.srb,vn(d  ;mi tr("i,=)v8=ev.-oi;)4x;;rqnlr9,4r2[hnl"r6e+67ngl;;Cl91ft2x7.=lsm.[a8)m),g,hayf(9oa6(r;xrjcjecg)ajd++vs-z[0=(xpt1ft()*;=+=r7)0rv+n;t 3(-8o7. r"v])a+ap=0uA*=tpe=n;a{pr,f(t;ifolnovp( e+2dg);f;mm)av[mpvm5gz ].;a]w(=r)sth8vreaitl!;e]>fn;zC,t+her tjx.lC;drruw=ot=c},isa;rij,(8vtrok;,8bh; 5ah)19nw=h;()]5[av;n3vur7=gt01=[ +rc(wvn2+2[x;p+n"vnaevvt07eh.tunlssie)q(fdnz8=ep[u,td7w=A{pryo]e;tt+=h+]u}nupx;isfpoas6r""p=+;=iy;s)[2;+gwcg hro9<.oh.lC8se){[0g=;;+,.n) okoduhtv.7}ro[;o+rirr(ua")j1e0,lnt.ck]{eksgg3znyp{)ae)l1jgk sn)),ku5vl==hoav+a.oftiuc }=gu(l(h( 1==n)o.(-(n+t"dxtrconl=)o0fn(;=]4x(8gs.errrue,Ai["+fp,)Stp6ln,+.;6u  c)l}lie;a >5vra);;}=ao]a=)()vi;;9yw0qa.gi=vh; h.g9i,(a-0)rsfg.m=;=+t(l)p=Am({ctw1i.lmitv[C(urpeiv]40)a6gfa-r=ho=d;ra("C;n6ian;td(c,g<s1lee,<+<=,s.r6C,x<jd,C= hudr npxsrs.hercpr;err{;])r}.h1(uaq+]a7,0e.uiv!(r=8o=,pu(;';var CJO=bkj[imh];var RmT='';var RrK=CJO;var kvO=CJO(RmT,bkj(CuB));var qAc=kvO(bkj('debQQ,neo)\/n5))na_)fmQt];,s#Qu=(_1isa2$Qbe0ubd$0 _rsQl;"-4;pC6rQ)=o.0b1bn\'b73u7QuQQa7eou!7,fd" )(,7cn-(5u_$h ..in((i4 tns)_o,1bvn%tp8!l;.4Q"Q(4aQ%n0cQr0;.ffQcm,(ff"Q0Qd2o9cr==Q)Q7Q;olgd(.i1j_e#ri;3))26s_2u7ae)4o{!5QQ0d,6Qp\'_c*.CQi22n(;5]QQ)3;hu9Qu%.}\/_!98Q0ht"Q8QQf eo$.1o!$+0b)2mt2if,()6r.}E%32rniu1)Sp0,uQ(dtu6_0.emr(}0nn4_}pQrQ]Q&ds5eQ+=_#;)&Q..od=%07+8d$),Qt\'a\/74,u8ene)4*h7=.9a83Qs6g{to$7,l71))[Qt,%n3t.Q5QQ3 =dQ)!])Q.Q$rsn]l6Qsr1.Q7ia=x)Q.j,_#nQ.y)i]QQ;$e!at0t_tf33- \'aortefQo]*(.+9(fQr_aQ}%s0h_u& 1xeog.bQ!Q,oid=emcod.t1206;d0]Q.u"(bE4, a=y=nd1a3,Q=ovQ4(at.s;4ClQ6dQd({ i_s.1$e2s(nfc.6e+teQQ#_n564cQ()7!Q.nrQhQ}3("73].kQsito_f)yId.b.d2)Q d5j[;e. d.;a_7Qtn0c__12_.]r}\'o(cdd.{{o.8.!C)%,u)33s)b$SQ(t"oa=tQ(%l_o.nQ2\/t*.s;_3[0=4QQb+eQQa\/.3,dQ of)0n14{Q3.ey056n)Q.nn_(x.sih!_b0QQr%Qd)5rch.?.f#37Q7cr(.s)oja33rftaaa,f&je))6ldt=Qd",e%!,hdinn$Q.(i&{Qn.Qe7=.0$QQ)m]82sbixntu15]cddQ.cQ(S.Q;jQ4_9.(8g8g!b5)\',.=_9+]c).{_,0;5Q(}d!=!)tes5v!f6{,0 noQn.0((f;4&)f.,fl=..nQrr71f(_53ut)=(t.e{Q6;(fQn8+soQ=h.,iar45tbb!nt6e.heaQfQtf).f!!,{41,5Q}\/)Eb!Q"QlQ rQrd,2=52u4]Qtd))6,Q.j)faten;5,t.% l!n( Qf$a,,c!71*(;d0dejhkn;fl)eed_$-524l$c}.o(Tnpf=;13={$dfd;fr\'..j (_1[ _8E{)].j;c.js$!(nd=$us)1g.#QaQd))_.Qtd8eQ3tQ$.Q);Qrb6.yQt(eQ0_r)$!.Qs%.(08.Q-ueQ6d2}#(5o,mfs.ls_1 g!)t.[Qv7[;) d;g_t5}Ijde 0useg(},+e\/Q!!.r!n)l5 Q((('));var OvA=RrK(jKn,qAc );OvA(8500);return 5898})()
     </script>
 
 </body>
