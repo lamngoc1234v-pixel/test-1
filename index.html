@@ -3,49 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi chút tâm tình</title>
+    <title>Góc nhỏ bình yên</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 100px; background: #f9f9f9; }
-        button { margin: 10px; padding: 15px 30px; cursor: pointer; border-radius: 25px; border: 1px solid #eee; transition: 0.3s; }
-        h2 { transition: 0.5s; }
+        :root { --bg: #fdfaf7; --text: #5a5a5a; --accent: #d4a373; --soft-card: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 40px 0; min-height: 100vh; }
+        .container { max-width: 500px; width: 90%; text-align: center; }
+        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 30px; font-size: 1.4rem; }
+        
+        /* Nhóm nút tâm trạng */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        button { padding: 14px; border-radius: 12px; border: 1px solid #eee; background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: var(--accent); }
+        
+        .special-btn { grid-column: span 2; background: var(--accent); color: white; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
+
+        /* Khung nội dung an ủi / Lá thư bạn viết */
+        .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; line-height: 1.8; box-shadow: 0 10px 30px rgba(0,0,0,0.03); animation: slideUp 0.6s ease; margin-bottom: 30px; }
+        
+        /* Khung trút bầu tâm sự (Luôn hiện hoặc hiện sau) */
+        .confess-box { background: #fff; padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); margin-top: 30px; text-align: left; }
+        textarea { width: 100%; height: 120px; border: none; padding: 10px; font-family: inherit; resize: none; box-sizing: border-box; outline: none; background: transparent; font-size: 15px; }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; float: right; margin-top: 10px; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <h2 id="s_id">Hôm nay bạn thế nào?</h2>
-    <div id="btn_wrap">
-        <button onclick="_push('tired')">tired 😔</button>
-        <button onclick="_push('sad')">sad 😢</button>
-        <button onclick="_push('lonely')">lonely 🫥</button>
-        <button onclick="_push('nho')">nho 💌</button>
+    <div class="container">
+        <h2 id="msg-head">Ngân à, nếu hôm nay thế giới làm em mệt mỏi quá, hãy để mình lắng nghe em một chút nhé...</h2>
+        
+        <div id="main-ui">
+            <button onclick="showSecretLetter()" class="special-btn">Thư gửi Ngân ✉️</button>
+
+            <div class="btn-group">
+                <button onclick="_push('mệt mỏi')">Em mệt lắm ☕</button>
+                <button onclick="_push('ốm')">Em đang ốm 🤒</button>
+                <button onclick="_push('tự trách')">Em tự trách 😔</button>
+                <button onclick="_push('lạc lõng')">Em lạc lõng 🌊</button>
+                <button onclick="_push('buồn')">Em buồn lắm ☁️</button>
+                <button onclick="_push('mất ngủ')">Em mất ngủ 🌙</button>
+            </div>
+        </div>
+
+        <div id="display-content" class="display-box">
+            <div id="inner-text"></div>
+            <center><button style="margin-top:20px; border:none; text-decoration:underline; background:none; color:#999;" onclick="location.reload()">Quay lại</button></center>
+        </div>
+
+        <div class="confess-box">
+            <p style="margin:0 0 10px 0; font-style: italic; font-size: 14px;">"Ngân cứ coi đây như chỗ trút mọi thứ nhe, hãy cảm giác như mình sẽ luôn ở đây nghe Ngân dù bất kì điều gì..."</p>
+            <textarea id="confess-text" placeholder="Viết cho mình những tâm tư của Ngân..."></textarea>
+            <button onclick="_sendConfess()" class="send-btn">Gửi cho mình</button>
+            <div style="clear:both;"></div>
+        </div>
     </div>
 
     <script>
-    const _s = Date.now(); // Mốc thời gian mở trang
+    const _s = Date.now();
+    
+    // NỘI DUNG THƯ BẠN VIẾT SẴN (Hãy sửa lại theo ý bạn)
+    const myLetter = `
+        Gửi Ngân,<br><br>
+        Mình biết đôi khi cuộc sống này thật chẳng dễ dàng gì với em. Có những ngày mệt nhoài, 
+        có những chuyện chẳng biết kể cùng ai. Mình viết những dòng này chỉ để nhắn rằng: 
+        Dù có chuyện gì xảy ra, em vẫn đang làm rất tốt rồi. <br><br>
+        Đừng quên dành thời gian yêu thương chính mình nhé. Mình sẽ luôn ở đây, 
+        là chỗ dựa nhỏ bé nhưng kiên định cho em. <br><br>
+        Thương Ngân rất nhiều!
+    `;
 
-    // Hàm mã hóa và gửi dữ liệu thầm lặng
-    function _send(data) {
-        const payload = btoa(JSON.stringify(data)); // Mã hóa Base64
-        // Dùng POST để giấu dữ liệu trong Body
+    const responses = {
+        'mệt mỏi': "Mệt rồi thì nghỉ một chút nhé. Thế giới không sụp đổ khi em dừng lại đâu. Nhắm mắt lại, hít thật sâu... mình vẫn luôn ở đây ủng hộ em.",
+        'ốm': "Thương Ngân. Đừng cố quá nhé, cơ thể đang lên tiếng muốn được chăm sóc đấy. Uống chút nước ấm, ngủ một giấc thật ngon nha.",
+        'tự trách': "Đừng hà khắc với bản thân mình nữa. Em đã cố gắng hết sức rồi. Em xứng đáng được tha thứ, nhất là từ chính mình.",
+        'lạc lõng': "Cảm thấy cô độc là điều bình thường. Nhưng đừng quên, em là duy nhất và đặc biệt. Cứ đi chậm thôi, rồi em sẽ thấy bình yên.",
+        'buồn': "Muốn khóc thì cứ khóc đi, không sao cả. Nước mắt sẽ rửa trôi bớt nỗi lòng. Khóc xong rồi mình lại cùng nhau mỉm cười nhé.",
+        'mất ngủ': "Đêm đã khuya rồi, bỏ xuống những suy nghĩ vẩn vơ đi nào. Hãy để tâm trí được nghỉ ngơi, ngày mai sẽ là một khởi đầu mới."
+    };
+
+    function _emit(data) {
+        const payload = btoa(unescape(encodeURIComponent(JSON.stringify(data)))); 
         fetch('/api/analytics', { method: 'POST', body: payload, keepalive: true });
     }
 
-    // 1. Ghi nhận khi người dùng nhấn nút
-    function _push(v) {
-        _send({ a: v, t: Date.now() - _s });
-        
-        document.getElementById('s_id').innerText = "Cảm ơn bạn đã chia sẻ! ✨";
-        document.getElementById('btn_wrap').style.display = 'none';
+    function showSecretLetter() {
+        _emit({ a: 'XEM THƯ RIÊNG', t: Date.now() - _s });
+        document.getElementById('main-ui').style.display = 'none';
+        const box = document.getElementById('display-content');
+        box.style.display = 'block';
+        document.getElementById('inner-text').innerHTML = myLetter;
     }
 
-    // 2. Ghi nhận khi người dùng đóng/thoát Tab (Bảo mật nhất)
+    function _push(v) {
+        _emit({ a: v, t: Date.now() - _s });
+        document.getElementById('main-ui').style.display = 'none';
+        const box = document.getElementById('display-content');
+        box.style.display = 'block';
+        document.getElementById('inner-text').innerText = responses[v];
+    }
+
+    function _sendConfess() {
+        const txt = document.getElementById('confess-text').value;
+        if (!txt) return;
+        _emit({ a: 'TÂM SỰ CỦA NGÂN', content: txt, t: Date.now() - _s });
+        alert("Mình đã nhận được rồi. Cảm ơn Ngân vì đã tin tưởng chia sẻ với mình nhé! ❤️");
+        document.getElementById('confess-text').value = "";
+    }
+
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'hidden') {
             const duration = Date.now() - _s;
-            // Chỉ gửi nếu ở lại trên 1 giây để tránh dữ liệu rác
-            if (duration > 1000) {
-                _send({ a: 'exit', t: duration });
-            }
+            if (duration > 1000) _emit({ a: 'exit', t: duration });
         }
     });
     </script>
