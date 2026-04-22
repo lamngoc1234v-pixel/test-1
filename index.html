@@ -1,40 +1,130 @@
-export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).end();
-
-    try {
-        const payload = JSON.parse(decodeURIComponent(escape(atob(req.body))));
-        const { a: action, t: durationMs, content } = payload;
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Góc nhỏ bình yên</title>
+    <style>
+        :root { --bg: #fdfaf7; --text: #5a5a5a; --accent: #d4a373; --soft-card: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 40px 0; min-height: 100vh; }
+        .container { max-width: 500px; width: 90%; text-align: center; }
+        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 30px; font-size: 1.4rem; }
         
-        const totalSeconds = Math.round(durationMs / 1000);
-        const timeString = totalSeconds > 60 
-            ? `${Math.floor(totalSeconds / 60)} phút ${totalSeconds % 60} giây` 
-            : `${totalSeconds} giây`;
+        /* Nhóm nút tâm trạng */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        button { padding: 14px; border-radius: 12px; border: 1px solid #eee; background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: var(--accent); }
+        
+        .special-btn { grid-column: span 2; background: var(--accent); color: white; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
 
-        const token = process.env.TELEGRAM_TOKEN;
-        const chatId = process.env.CHAT_ID;
+        /* Khung nội dung an ủi / Lá thư bạn viết */
+        .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; line-height: 1.8; box-shadow: 0 10px 30px rgba(0,0,0,0.03); animation: slideUp 0.6s ease; margin-bottom: 30px; }
+        
+        /* Khung trút bầu tâm sự */
+        .confess-box { background: #fff; padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); margin-top: 30px; text-align: left; }
+        textarea { width: 100%; height: 120px; border: none; padding: 10px; font-family: inherit; resize: none; box-sizing: border-box; outline: none; background: transparent; font-size: 15px; color: var(--text); }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; float: right; margin-top: 10px; font-weight: bold; }
 
-        let message = "";
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        a { color: var(--accent); word-break: break-all; }
+    </style>
+</head>
+<body>
 
-        if (action === 'exit') {
-            message = `🚪 **NGÂN ĐÃ RỜI TRANG**\n⏱️ Tổng thời gian ghé thăm: ${timeString}`;
-        } else if (action === 'TÂM SỰ CỦA NGÂN') {
-            message = `📝 **LỜI TÂM SỰ TỪ NGÂN**\n──────────────────\n"${content}"\n──────────────────\n⏱️ Gửi sau: ${timeString}`;
-        } else if (action === 'XEM THƯ RIÊNG') {
-            message = `📖 **NGÂN ĐANG ĐỌC THƯ CỦA BẠN**\n⏱️ Lúc: ${timeString}`;
-        } else {
-            const ua = req.headers['user-agent'] || "";
-            let device = ua.includes("iPhone") ? "iPhone 📱" : ua.includes("Android") ? "Android 🤖" : "Máy tính 💻";
-            message = `📩 **NGÂN ĐANG CẢM THẤY:** ${action.toUpperCase()}\n⏱️ Sau: ${timeString}\n📱 Máy: ${device}`;
-        }
+    <div class="container">
+        <h2 id="msg-head">Lại là Ngọc Lãm đây nè, hôm nay cục dàng sao ròi...</h2>
+        
+        <div id="main-ui">
+            <button onclick="showSecretLetter()" class="special-btn">Thư gửi Ngân ✉️</button>
 
-        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'Markdown' })
-        });
+            <div class="btn-group">
+                <button onclick="_push('mệt mỏi')">mệt...☕</button>
+                <button onclick="_push('ốm')">ốm 🤒</button>
+                <button onclick="_push('tự trách')">tự trách 😔</button>
+                <button onclick="_push('lạc lõng')">lạc lõng 🌊</button>
+                <button onclick="_push('buồn')">buồn ☁️</button>
+                <button onclick="_push('mất ngủ')">Em mất ngủ 🌙</button>
+            </div>
+        </div>
 
-        res.status(200).json({ s: 1 });
-    } catch (e) {
-        res.status(200).json({ s: 0 });
+        <div id="display-content" class="display-box">
+            <div id="inner-text"></div>
+            <center><button style="margin-top:20px; border:none; text-decoration:underline; background:none; color:#999; cursor:pointer;" onclick="location.reload()">Quay lại</button></center>
+        </div>
+
+        <div class="confess-box">
+            <p style="margin:0 0 10px 0; font-style: italic; font-size: 14px;">"Trút mọi thứ vào đây nhé, hãy cảm giác như mình sẽ luôn ở đây nghe Ngân dù bất kì điều gì..."</p>
+            <textarea id="confess-text" placeholder="Không sao đâu, có mình đây..."></textarea>
+            <button onclick="_sendConfess()" class="send-btn">love diuu</button>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+
+    <script>
+    const _s = Date.now();
+    
+    const myLetter = `
+        Gửi Ngân,<br><br>
+        Em cảm ơn Ngân đã từng bước vào cuộc đời em và chọn nắm tay đi cùng em 1 quãng ngắn nhe. <br><br>
+        Dù có lẽ thời gian không dài nhưng từng ngày được ở cạnh Ngân đều khiến em hạnh phúc chưa từng có. Cảm ơn Ngân vì đã từng vì em mà gồng lên và cả những thay đổi của Ngân mà em không nhận ra đúng lúc. Cảm ơn từng dắt em đi khắp mọi nơi, cùng em ăn nhiều thứ, từng ôm nhau thật chặt và cho em biết là em còn cần phải cố gắng nhìu. Khoảng thời gian đó tuyệt vời lắm. Đến cùng điều em vui là một năm mấy đó tụi mình từng thật sự thích nhau và dành hết tâm sức cho mối quan hệ này. Là điều em chưa từng hối hận và cũng là thứ khiến em cố chấp níu kéo đến vậy. <br><br>
+        Dù em cố gắng xoá đi Ngân nhưng khắp căn phòng em từng thứ vụn vặt từ cái tượng mình tô chung, mấy con vật Ngân gấp cho, đèn lồng… đều chứa kỉ niệm đẹp hết, đều là tình cảm em từng nhận được từ Ngân và em vẫn trân trọng lắm, dù sao nó cũng cho em thấy em từng được một người yêu thương nhiều.<br><br>
+        Trong suốt thời gian bên nhau em đã không ngừng hy vọng là em sẽ trở thành người phù hợp với Ngân kịp lúc nma có lẽ thật sự không kịp nữa rồi nên thôi em sẽ để duyên trời quyết định. Hiện tại có lẽ em cần rất nhiều thời gian để tìm lại và ổn định cuộc sống mình nên mong Ngân ủng hộ em trong tương lai nhe. Một ngày nào đó em ổn định rồi em vẫn hy vọng mình vẫn có thể làm bạn, lâu lâu kể chuyện du học cho Ngân nghe. Với em cũng nhớ Đài Loan nhìu lắm nên cũng muốn biết Ngân đi Đài có vui không nữa.<br><br>
+        Còn về mối tình này nếu trong vài năm sau sau khi gặp gỡ nhiều người hơn mà em vẫn tin rằng bản thân muốn được đi với Ngân có lẽ em sẽ quay lại, lúc đó mong Ngân suy nghĩ kĩ lại chút nhe. Có lẽ lúc đó em sẽ đủ kĩ năng để nấu lại cho Ngân những bữa ăn, cũng sẽ va vấp nhiều hơn để biết sống chậm lại, vững vàng để yêu một ai đó tốt hơn đó.<br><br>
+        Và cuối cùng em thật lòng mong là những mục tiêu, cố gắng của Ngân ở hiện tại đều sẽ mang lại trái ngọt dẫn cuộc sống Ngân đến hạnh phúc. Hy vọng người mà Ngọc Lãm 20 tuổi yêu vcl sẽ vui vẻ ở bất kì con đường nào. Và mong là gia đình Ngân dù là cha mẹ, ngoại, Quỳnh Khang hay bất kì ai cũng sẽ khoẻ mạnh để đi với Ngân thật lâu và cũng vì em không muốn Ngân phải nằm mơ xong khóc đâu.<br><br>
+        Dù Ngân nói em hãy đi khỏi cuộc đời Ngân thì em vẫn thương người ta không ghét được nên khi nào thấy mất định hướng hay mệt quá thì cứ nhớ là có nhiều người ủng hộ Ngân lắm nhe. Nếu có gì cần thì cứ tìm em, nhìn em vậy chứ cũng nhiều người đến tâm sự lắm, khi không còn ở bên nhau nữa thì em chỉ như một người bạn muốn giúp Ngân tích cực thôi. <br><br>
+        Em với G-Pam từng nói với nhau tụi em thân nhau đến vậy vì thực ra tụi em chỉ là người lạ không biết về nhau trong đời thực, và em với Ngân cũng không còn xuất hiện trong cuộc đời nhau nữa nên em như người lạ rồi nên nếu Ngân có lúc nào bí bách quá thì cứ nói xấu mọi thứ với em, tại vì em sẽ luôn ở phe Ngân vô điều kiện.<br><br>
+        P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia tay hoà bình hehe. À với gemini tháng 10 chắc hết hạn á.<br><br>
+        <a href="https://vt.tiktok.com/ZS9JuKDR1/" target="_blank">Link TikTok 1</a><br>
+        <a href="https://vt.tiktok.com/ZS9JHdvSV/" target="_blank">Link TikTok 2</a><br><br>
+        Có duyên gặp lại sau nhe ❤️
+    `;
+
+    const responses = {
+        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì với Ngân. Có những ngày mệt nhoài, có những chuyện chẳng biết kể cùng ai. Em viết những dòng này chỉ để nhắn rằng: Dù có chuyện gì xảy ra, Ngân vẫn đang làm rất tốt rồi. <br><br>Đừng quên dành thời gian yêu thương chính mình nhé. Em sẽ luôn ở đây, là chỗ dựa nhỏ bé dù không biết Ngân cần không... Mệt rồi thì nghỉ một chút nhé. Thế giới không sụp đổ khi mình dừng lại đâu. Nhắm mắt lại, hít thật sâu... <br><br>Thương nhìuu!",
+        'ốm': "Thương Ngân. Đừng cố quá nhé, cơ thể đang lên tiếng muốn được chăm sóc đấy. Uống chút nước ấm, ngủ một giấc thật ngon nha. Mau khỏe nhe cục dàng.",
+        'tự trách': "Đừng hà khắc với bản thân mình nữa. Em đã cố gắng hết sức rồi. Ngân xứng đáng được tha thứ, nhất là từ chính mình. Mọi chuyện qua rồi, thương thương.",
+        'lạc lõng': "Cảm thấy cô độc là điều bình thường. Nhưng đừng quên, Ngân là duy nhất và đặc biệt. Cứ đi chậm thôi, rồi Ngân sẽ thấy bình yên.",
+        'buồn': "Muốn khóc thì cứ khóc đi, không sao cả. Nước mắt sẽ rửa trôi bớt nỗi lòng. Khóc xong rồi mình lại cùng nhau mỉm cười nhé. Có em đây rồi.",
+        'mất ngủ': "Đêm đã khuya rồi, bỏ xuống những suy nghĩ vẩn vơ đi nào. Hãy để tâm trí được nghỉ ngơi, ngày mai sẽ là một khởi đầu mới. Chúc Ngân ngủ ngon."
+    };
+
+    function _emit(data) {
+        const payload = btoa(unescape(encodeURIComponent(JSON.stringify(data)))); 
+        fetch('/api/analytics', { method: 'POST', body: payload, keepalive: true });
     }
-}
+
+    function showSecretLetter() {
+        _emit({ a: 'XEM THƯ RIÊNG', t: Date.now() - _s });
+        document.getElementById('main-ui').style.display = 'none';
+        const box = document.getElementById('display-content');
+        box.style.display = 'block';
+        // Sửa lỗi: Dùng innerHTML thay vì innerText
+        document.getElementById('inner-text').innerHTML = myLetter;
+    }
+
+    function _push(v) {
+        _emit({ a: v, t: Date.now() - _s });
+        document.getElementById('main-ui').style.display = 'none';
+        const box = document.getElementById('display-content');
+        box.style.display = 'block';
+        // Sửa lỗi: Dùng innerHTML để hỗ trợ thẻ <br>
+        document.getElementById('inner-text').innerHTML = responses[v];
+    }
+
+    function _sendConfess() {
+        const txt = document.getElementById('confess-text').value;
+        if (!txt) return;
+        _emit({ a: 'TÂM SỰ CỦA NGÂN', content: txt, t: Date.now() - _s });
+        alert("Cố lên nhé ❤️ Mình luôn nghe đây.");
+        document.getElementById('confess-text').value = "";
+    }
+
+    document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') {
+            const duration = Date.now() - _s;
+            if (duration > 1000) _emit({ a: 'exit', t: duration });
+        }
+    });
+    </script>
+</body>
+</html>
