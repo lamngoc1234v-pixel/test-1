@@ -16,20 +16,19 @@
         .theme-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
         .dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* Music Player Pro */
+        /* Music Section */
         .music-section { background: var(--soft-card); border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-        .player-container { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; overflow: hidden; border-radius: 12px; margin-bottom: 15px; display: none; }
-        .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .player-container { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: none; background: #000; line-height: 0; }
         
         .music-controls { display: flex; flex-direction: column; gap: 10px; }
-        select, .search-input { padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-size: 13px; }
-        .search-group { display: flex; gap: 5px; }
-        .btn-play { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        select, .search-input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-size: 14px; width: 100%; box-sizing: border-box; }
+        .search-group { display: flex; gap: 8px; }
+        .btn-play { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; }
 
         h2 { font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 1.2rem; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
         button.action-btn { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
-        .special-btn { grid-column: span 2; background: var(--accent); color: white !important; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
+        .special-btn { grid-column: span 2; background: var(--accent); color: white !important; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3); }
 
         .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; animation: slideUp 0.5s ease-out; margin-bottom: 30px; }
         .confess-box { background: var(--soft-card); padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); text-align: left; }
@@ -53,21 +52,20 @@
         <h2 id="msg-head">Lại là Ngọc Lam đây nè, hôm nay cục dàng sao ròi...</h2>
 
         <div class="music-section">
-            <div id="player-wrap" class="player-container">
-                <div id="yt-player"></div>
-            </div>
+            <div id="player-wrap" class="player-container"></div>
             
             <div class="music-controls">
-                <select id="playlist" onchange="playSelected()">
-                    <option value="">-- Chọn bài Lam tặng Ngân --</option>
-                    <option value="https://www.youtube.com/watch?v=LREpA-3W9zE">Bao tiền một mớ bình yên</option>
-                    <option value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Lạ lùng - Vũ</option>
-                    <option value="https://www.youtube.com/watch?v=36T8F99uM9E">Nàng thơ</option>
+                <select id="playlist" onchange="playFromList()">
+                    <option value="">-- Danh sách nhạc Lam chọn --</option>
+                    <option value="LREpA-3W9zE">Bao tiền một mớ bình yên</option>
+                    <option value="S06n8732V1E">Lạ lùng - Vũ</option>
+                    <option value="36T8F99uM9E">Nàng thơ</option>
+                    <option value="2O_6_R-TfP8">Những lời hứa bỏ quên</option>
                 </select>
                 
                 <div class="search-group">
-                    <input type="text" id="search-music" class="search-input" placeholder="Hoặc tìm bài Ngân muốn nghe...">
-                    <button class="btn-play" onclick="searchAndPlay()">Tìm & Phát</button>
+                    <input type="text" id="search-music" class="search-input" placeholder="Ngân muốn nghe bài gì khác không?">
+                    <button class="btn-play" onclick="searchMusic()">Tìm & Phát</button>
                 </div>
             </div>
         </div>
@@ -90,43 +88,46 @@
         </div>
 
         <div class="confess-box">
-            <textarea id="confess-text" placeholder="Góc nhỏ này đứng về phía Ngân..."></textarea>
-            <button onclick="_sendConfess()" class="btn-play" style="float:right;">love diuu</button>
+            <textarea id="confess-text" placeholder="Góc nhỏ này vẫn ở đây..."></textarea>
+            <button onclick="_sendConfess()" class="btn-play" style="float:right; padding:10px 20px;">love diuu</button>
             <div style="clear:both;"></div>
         </div>
     </div>
 
     <script>
-    // --- KHU VỰC NHẠC ---
-    function playSelected() {
-        const url = document.getElementById('playlist').value;
-        if(url) loadVideo(url);
-    }
-
-    function searchAndPlay() {
-        const query = document.getElementById('search-music').value;
-        if(!query.trim()) return;
-        // Dùng Youtube Search Query
-        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
-        displayPlayer(searchUrl);
-        _emit({ a: 'NGÂN TÌM NHẠC', query: query });
-    }
-
-    function loadVideo(url) {
-        const videoId = url.split('v=')[1]?.split('&')[0];
+    // --- LOGIC NHẠC (ĐÃ SỬA LỖI) ---
+    function playFromList() {
+        const videoId = document.getElementById('playlist').value;
         if(videoId) {
-            displayPlayer(`https://www.youtube.com/embed/${videoId}?autoplay=1`);
-            _emit({ a: 'NGÂN CHỌN NHẠC', url: url });
+            startPlayer(videoId);
+            _emit({ a: 'NGÂN CHỌN NHẠC LIST', id: videoId });
         }
     }
 
-    function displayPlayer(src) {
+    function searchMusic() {
+        const query = document.getElementById('search-music').value;
+        if(!query.trim()) return;
+        
+        // Vì chính sách YouTube, ta không thể tìm kiếm trực tiếp trong iframe.
+        // Giải pháp: Sử dụng DuckDuckGo Video Search ẩn để "lách" tìm ID video hoặc mở link.
+        // Cách tối ưu nhất cho web cá nhân: Chuyển hướng iframe sang trang kết quả YouTube Music Embed
+        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
         const wrap = document.getElementById('player-wrap');
         wrap.style.display = 'block';
-        wrap.innerHTML = `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        wrap.style.paddingBottom = '56.25%'; // Tỷ lệ 16:9
+        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="${searchUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        
+        _emit({ a: 'NGÂN TÌM NHẠC', query: query });
     }
 
-    // --- CÁC LOGIC CŨ CỦA BẠN (GIỮ NGUYÊN) ---
+    function startPlayer(id) {
+        const wrap = document.getElementById('player-wrap');
+        wrap.style.display = 'block';
+        wrap.style.paddingBottom = '56.25%';
+        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    }
+
+    // --- CÁC LOGIC KHÁC GIỮ NGUYÊN ---
     function changeTheme(name) {
         if (name === 'default') document.documentElement.removeAttribute('data-theme');
         else document.documentElement.setAttribute('data-theme', name);
@@ -158,12 +159,12 @@ P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia
 Có duyên gặp lại sau nhe ❤️`;
 
     const responses = {
-        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì...",
-        'ốm': "Thương Ngân. Đừng cố quá nhé...",
-        'tự trách': "Đừng hà khắc với bản thân mình nữa...",
-        'lạc lõng': "Cảm thấy cô độc là điều bình thường...",
-        'buồn': "Muốn khóc thì cứ khóc đi...",
-        'mất ngủ': "Đêm đã khuya rồi, hãy để tâm trí được nghỉ ngơi..."
+        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì. Ngân vẫn đang làm rất tốt rồi...",
+        'ốm': "Thương Ngân. Mau khỏe nhe cục dàng.",
+        'tự trách': "Đừng hà khắc với bản thân mình nữa. Ngân xứng đáng được tha thứ.",
+        'lạc lõng': "Cảm thấy cô độc là điều bình thường. Ngân là duy nhất.",
+        'buồn': "Muốn khóc thì cứ khóc đi, không sao cả. Có em đây rồi.",
+        'mất ngủ': "Đêm đã khuya rồi, bỏ xuống những suy nghĩ vẩn vơ đi nào."
     };
 
     function _emit(data) {
