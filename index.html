@@ -18,12 +18,18 @@
 
         /* Music Section */
         .music-section { background: var(--soft-card); border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-        .player-container { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: none; background: #000; line-height: 0; position: relative; }
+        .player-container { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: none; background: #000; position: relative; padding-bottom: 56.25%; }
+        #ytplayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
         .music-controls { display: flex; flex-direction: column; gap: 10px; }
+        .playback-controls { display: flex; gap: 10px; justify-content: space-between; }
+        
         select, .search-input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-size: 14px; width: 100%; box-sizing: border-box; }
         .search-group { display: flex; gap: 8px; }
-        .btn-play { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+        
+        .btn-play { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: 0.3s; }
+        .btn-ctrl { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--soft-card); color: var(--text); font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-ctrl.active { background: var(--accent); color: white; border-color: var(--accent); }
 
         h2 { font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 1.2rem; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
@@ -52,21 +58,22 @@
         <h2 id="msg-head">Lại là Ngọc Lam đây nè, hôm nay cục dàng sao ròi...</h2>
 
         <div class="music-section">
-            <div id="player-wrap" class="player-container"></div>
+            <div id="player-wrap" class="player-container">
+                <div id="ytplayer"></div>
+            </div>
             
             <div class="music-controls">
-                <select id="playlist" onchange="playFromList()">
-                    <option value="">-- Danh sách nhạc Lam chọn --</option>
-                    <option value="V1bFr2SWP1I">Somewhere over the rainbow</option>
-                    <option value="H7i6NneefTw">Gingerbread Lover</option>
-                    <option value="PIM2CoRFQ1c">A Walk</option>
-                    <option value="D8rlcLH0pqk">Peter Pan was right</option>
-                    <option value="P7T-PJD_M3U">Rymths of the rain</option>
-                </select>
+                <div class="playback-controls">
+                    <button class="btn-ctrl" onclick="playAll()">▶ Phát tất cả</button>
+                    <button id="btn-shuffle" class="btn-ctrl" onclick="toggleShuffle()">🔁 Trộn: Tắt</button>
+                </div>
+
+                <select id="playlist" onchange="playFromSelect()">
+                    </select>
                 
                 <div class="search-group">
-                    <input type="text" id="search-music" class="search-input" placeholder="Ngân dán link YouTube bài muốn nghe nha...">
-                    <button class="btn-play" onclick="searchMusic()">Thêm & Phát</button>
+                    <input type="text" id="search-music" class="search-input" placeholder="Ngân dán link YouTube để lưu bài nhé...">
+                    <button class="btn-play" onclick="addMusic()">Thêm & Phát</button>
                 </div>
             </div>
         </div>
@@ -95,68 +102,166 @@
         </div>
     </div>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <script>
-    function playFromList() {
-        const videoId = document.getElementById('playlist').value;
-        if(videoId) {
-            startPlayer(videoId);
-            _emit({ a: 'NGÂN CHỌN NHẠC LIST', id: videoId });
+    // --- 1. QUẢN LÝ DANH SÁCH PHÁT ---
+    const defaultSongs = [
+        { id: "V1bFr2SWP1I", title: "Somewhere over the rainbow" },
+        { id: "H7i6NneefTw", title: "Gingerbread Lover" },
+        { id: "PIM2CoRFQ1c", title: "A Walk" },
+        { id: "D8rlcLH0pqk", title: "Peter Pan was right" },
+        { id: "P7T-PJD_M3U", title: "Rhythms of the rain" }
+    ];
+    
+    let myPlaylist = [];
+    let currentIndex = 0;
+    let isShuffle = false;
+    let player;
+
+    // Khởi tạo danh sách khi tải trang (Lấy từ bộ nhớ cục bộ + Mặc định)
+    function initPlaylist() {
+        const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
+        myPlaylist = [...defaultSongs, ...savedSongs];
+        renderSelect();
+    }
+
+    // Cập nhật giao diện thanh Dropdown
+    function renderSelect() {
+        const select = document.getElementById('playlist');
+        select.innerHTML = '<option value="">-- Danh sách nhạc --</option>';
+        myPlaylist.forEach((song, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.text = (index >= defaultSongs.length) ? `💖 ${song.title}` : song.title;
+            select.appendChild(opt);
+        });
+    }
+
+    // --- 2. YOUTUBE PLAYER API ---
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('ytplayer', {
+            playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        // Player đã sẵn sàng
+    }
+
+    // Nhận biết khi nào bài hát hết để tự chuyển bài
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.ENDED) {
+            playNext();
         }
     }
 
-    // --- LOGIC MỚI: XỬ LÝ LINK YOUTUBE VÀ THÊM VÀO DANH SÁCH ---
-    function searchMusic() {
+    // --- 3. ĐIỀU KHIỂN NHẠC ---
+    function playAll() {
+        if (myPlaylist.length > 0) {
+            document.getElementById('player-wrap').style.display = 'block';
+            playSong(0); // Luôn bắt đầu từ bài đầu tiên khi ấn nút này
+            _emit({ a: 'NGÂN ẤN PHÁT TẤT CẢ' });
+        }
+    }
+
+    function toggleShuffle() {
+        isShuffle = !isShuffle;
+        const btn = document.getElementById('btn-shuffle');
+        if (isShuffle) {
+            btn.innerText = '🔀 Trộn: Bật';
+            btn.classList.add('active');
+        } else {
+            btn.innerText = '🔁 Trộn: Tắt';
+            btn.classList.remove('active');
+        }
+    }
+
+    function playFromSelect() {
+        const val = document.getElementById('playlist').value;
+        if (val !== "") {
+            document.getElementById('player-wrap').style.display = 'block';
+            playSong(parseInt(val));
+        }
+    }
+
+    function playSong(index) {
+        currentIndex = index;
+        document.getElementById('playlist').value = index;
+        const videoId = myPlaylist[index].id;
+        
+        if (player && typeof player.loadVideoById === 'function') {
+            player.loadVideoById(videoId);
+        } else {
+            // Trường hợp API chưa kịp load
+            setTimeout(() => playSong(index), 500);
+        }
+    }
+
+    function playNext() {
+        if (isShuffle) {
+            // Chọn ngẫu nhiên 1 bài khác bài hiện tại
+            let nextIndex = currentIndex;
+            while (nextIndex === currentIndex && myPlaylist.length > 1) {
+                nextIndex = Math.floor(Math.random() * myPlaylist.length);
+            }
+            currentIndex = nextIndex;
+        } else {
+            // Chuyển bài kế tiếp, nếu hết danh sách thì quay lại bài 1
+            currentIndex++;
+            if (currentIndex >= myPlaylist.length) {
+                currentIndex = 0; 
+            }
+        }
+        playSong(currentIndex);
+    }
+
+    // --- 4. THÊM BÀI HÁT TỪ LINK VÀ LƯU VĨNH VIỄN ---
+    function addMusic() {
         const input = document.getElementById('search-music').value.trim();
         if(!input) return;
 
         let videoId = "";
-        // Biểu thức chính quy (Regex) để tự động nhận diện ID video từ mọi loại link YouTube
         const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
         const match = input.match(regExp);
 
         if (match && match[2].length === 11) {
             videoId = match[2];
         } else if (input.length === 11) { 
-            videoId = input; // Trường hợp dán thẳng ID
+            videoId = input; 
         } else {
-            alert("Ngân nhớ copy link YouTube của bài hát dán vào đây nhe, gõ tên khum ra đâu nè 🥺");
+            alert("Ngân nhớ copy link YouTube của bài hát dán vào đây nhe 🥺");
             return;
         }
 
-        // Tạo một tùy chọn mới và thêm vào danh sách thả xuống
-        const select = document.getElementById('playlist');
-        const newOption = document.createElement('option');
-        newOption.value = videoId;
-        newOption.text = "🎵 Bài hát Ngân vừa thêm";
-        select.appendChild(newOption);
+        // Tạo bài hát mới
+        const newSong = { id: videoId, title: "Bài hát Ngân vừa thêm" };
         
-        // Tự động chuyển danh sách sang bài vừa thêm
-        select.value = videoId;
+        // Cập nhật vào mảng hiện tại
+        myPlaylist.push(newSong);
+        
+        // Lưu vào Local Storage (chỉ lưu những bài Ngân thêm, không lưu bài mặc định)
+        const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
+        savedSongs.push(newSong);
+        localStorage.setItem('ngan_saved_songs', JSON.stringify(savedSongs));
 
-        // Xóa ô nhập liệu cho gọn
+        // Cập nhật giao diện và tự động phát bài vừa thêm
+        renderSelect();
+        document.getElementById('player-wrap').style.display = 'block';
+        playSong(myPlaylist.length - 1);
+        
         document.getElementById('search-music').value = "";
-
-        // Chạy bài nhạc
-        startPlayer(videoId);
-        _emit({ a: 'NGÂN THÊM NHẠC TỪ LINK', id: videoId });
+        _emit({ a: 'NGÂN THÊM NHẠC MỚI', id: videoId });
     }
 
-    function startPlayer(id) {
-        const wrap = document.getElementById('player-wrap');
-        wrap.style.display = 'block';
-        wrap.style.paddingBottom = '56.25%'; 
-        
-        // Dùng youtube-nocookie để giảm thiểu rủi ro bị chặn nhúng
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&showinfo=0&enablejsapi=1`;
-        
-        wrap.innerHTML = `<iframe width="100%" height="100%" 
-            style="position:absolute;top:0;left:0" 
-            src="${embedUrl}" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-            allowfullscreen></iframe>`;
-    }
+    // Chạy hàm khởi tạo danh sách khi mở web
+    initPlaylist();
 
+    // --- CÁC HÀM GIAO DIỆN KHÁC GIỮ NGUYÊN ---
     function changeTheme(name) {
         if (name === 'default') document.documentElement.removeAttribute('data-theme');
         else document.documentElement.setAttribute('data-theme', name);
