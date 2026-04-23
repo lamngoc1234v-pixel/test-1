@@ -18,7 +18,7 @@
 
         /* Music Section */
         .music-section { background: var(--soft-card); border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-        .player-container { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: none; background: #000; line-height: 0; }
+        .player-container { width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 15px; display: none; background: #000; line-height: 0; position: relative; }
         
         .music-controls { display: flex; flex-direction: column; gap: 10px; }
         select, .search-input { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-size: 14px; width: 100%; box-sizing: border-box; }
@@ -57,15 +57,15 @@
             <div class="music-controls">
                 <select id="playlist" onchange="playFromList()">
                     <option value="">-- Danh sách nhạc Lam chọn --</option>
-                    <option value="LREpA-3W9zE">Bao tiền một mớ bình yên</option>
-                    <option value="S06n8732V1E">Lạ lùng - Vũ</option>
-                    <option value="36T8F99uM9E">Nàng thơ</option>
-                    <option value="2O_6_R-TfP8">Những lời hứa bỏ quên</option>
+                    <option value="60It0Hsk09Y">Bao tiền một mớ bình yên</option>
+                    <option value="n3S6itPnd60">Lạ lùng - Vũ</option>
+                    <option value="8shD7N9V_Qk">Nàng thơ</option>
+                    <option value="fHAs6I8_560">Những lời hứa bỏ quên</option>
                 </select>
                 
                 <div class="search-group">
-                    <input type="text" id="search-music" class="search-input" placeholder="Ngân muốn nghe bài gì khác không?">
-                    <button class="btn-play" onclick="searchMusic()">Tìm & Phát</button>
+                    <input type="text" id="search-music" class="search-input" placeholder="Ngân dán link YouTube bài muốn nghe nha...">
+                    <button class="btn-play" onclick="searchMusic()">Thêm & Phát</button>
                 </div>
             </div>
         </div>
@@ -95,7 +95,6 @@
     </div>
 
     <script>
-    // --- LOGIC NHẠC (ĐÃ SỬA LỖI) ---
     function playFromList() {
         const videoId = document.getElementById('playlist').value;
         if(videoId) {
@@ -104,42 +103,71 @@
         }
     }
 
+    // --- LOGIC MỚI: XỬ LÝ LINK YOUTUBE VÀ THÊM VÀO DANH SÁCH ---
     function searchMusic() {
-        const query = document.getElementById('search-music').value;
-        if(!query.trim()) return;
+        const input = document.getElementById('search-music').value.trim();
+        if(!input) return;
+
+        let videoId = "";
+        // Biểu thức chính quy (Regex) để tự động nhận diện ID video từ mọi loại link YouTube
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = input.match(regExp);
+
+        if (match && match[2].length === 11) {
+            videoId = match[2];
+        } else if (input.length === 11) { 
+            videoId = input; // Trường hợp dán thẳng ID
+        } else {
+            alert("Ngân nhớ copy link YouTube của bài hát dán vào đây nhe, gõ tên khum ra đâu nè 🥺");
+            return;
+        }
+
+        // Tạo một tùy chọn mới và thêm vào danh sách thả xuống
+        const select = document.getElementById('playlist');
+        const newOption = document.createElement('option');
+        newOption.value = videoId;
+        newOption.text = "🎵 Bài hát Ngân vừa thêm";
+        select.appendChild(newOption);
         
-        // Thêm các thuộc tính allow đầy đủ để trình duyệt cho phép iframe phát nhạc và hoạt động đúng.
-        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
-        const wrap = document.getElementById('player-wrap');
-        wrap.style.display = 'block';
-        wrap.style.paddingBottom = '56.25%'; // Tỷ lệ 16:9
-        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="${searchUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
-        
-        _emit({ a: 'NGÂN TÌM NHẠC', query: query });
+        // Tự động chuyển danh sách sang bài vừa thêm
+        select.value = videoId;
+
+        // Xóa ô nhập liệu cho gọn
+        document.getElementById('search-music').value = "";
+
+        // Chạy bài nhạc
+        startPlayer(videoId);
+        _emit({ a: 'NGÂN THÊM NHẠC TỪ LINK', id: videoId });
     }
 
     function startPlayer(id) {
         const wrap = document.getElementById('player-wrap');
         wrap.style.display = 'block';
-        wrap.style.paddingBottom = '56.25%';
-        // Bổ sung các quyền allow (như accelerometer, autoplay, clipboard-write, v.v)
-        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
+        wrap.style.paddingBottom = '56.25%'; 
+        
+        // Dùng youtube-nocookie để giảm thiểu rủi ro bị chặn nhúng
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&showinfo=0&enablejsapi=1`;
+        
+        wrap.innerHTML = `<iframe width="100%" height="100%" 
+            style="position:absolute;top:0;left:0" 
+            src="${embedUrl}" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen></iframe>`;
     }
 
-    // --- CÁC LOGIC KHÁC GIỮ NGUYÊN ---
     function changeTheme(name) {
         if (name === 'default') document.documentElement.removeAttribute('data-theme');
         else document.documentElement.setAttribute('data-theme', name);
     }
 
-    const _s = Date.now();
     const myLetter = `Gửi Ngân,
 
 Em viết bức thư này để tự đặt dấu chấm cho bản thân.
 
 Em cảm ơn ngân đã từng bước vào cuoc đời em và chọn nắm tay đi cùng em 1 quãng ngắn nhe.
 
-Dù có lẽ thời gian không dài nhưng từng ngày được ở cạnh ngân đều khiến em hạnh phúc chưa từng có. Cảm ơn ngân vì đã từng vid em mà gồng lên và cả những thay đổi của ngân mà em không nhận ra đúng lúc. Cảm ơn từng dắt em đi khắp mọi nơi, cùng em ăn nhiều thứ, từng ôm nhau thật chặt và cho em biết là em còn cần phải cố gắng nhìu. Khoảng thời gian đó tuyệt vời lắm. Đến cùng điều em vui là một năm mấy đó tụi mình từng thật sự thích nhau và dành hết tâm sức cho mối quan hệ này. Là điều em chưa từng hối hận và cũng là thứ khiến em cố chấp níu kéo đến vậy. Dù em cố gắng xoá đi ngân nhưng khắp căn phòng em từng thứ vụn vặt từ cái tượng mình tô chung, mấy con vật ngân gấp cho, đèn lồng… đều chứa kỉ niệm đẹp hết, đều là tình cảm em từng nhận được từ ngân và em vẫn trân trọng lắm, dù sao nó cũng cho em thấy em từng được một người yêu thương nhiều
+Dù có lẽ thời gian không dài nhưng từng ngày được ở cạnh ngân đều khiến em hạnh phúc chưa từng có. Cảm ơn ngân vì đã từng vid em mà gồng lên và cả những thay đổi của ngân mà em không nhận ra đúng lúc. Cảm ơn từng dắt em đi khắp mọi nơi, cùng em ăn nhiều thứ, từng ôm nhau thật chặt và cho em biết là em còn cần phải cố gắng nhìu. Khoảng thời gian đó tuyệt vời lắm. Đến cùng điều em vui là một năm mấy đó tụi mình từng thật sự thích nhau và dành hết tâm sức cho mối quan hệ này. Là điều em chưa từng hối hận và cũng là thứ khiến em cố chấp níu kéo đến vậy. Dù em cố gắng xoá đi ngân nhưng khắp căn phòng em từng thứ vụn vặt từ cái tượng mình tô chung, mấy con vật ngân gấp cho, đèn lồng… đều chứa kỉ niệm đẹp hết, đều là tình cảm em từng nhận được từ ngân và em vẫn trân trọng lắm, dù sao nó cũng cho em thấy em từng được một người yêu thương nhiều.
 
 Trong suốt thời gian bên nhau em đã không ngừng hy vọng là em sẽ trở thành người phù hợp với ngân kịp lúc nma có lẽ thật sự k kịp nữa rồi nên thoi em sẽ để duyên trời quyết định. Hiện tại có lẽ em cần rất nhiều thời gian để tìm lại và ổn định cuộc sống mình nên mong ngân ủng hộ em trong tương lai nhe. Một ngày nào đó em ổn định ròi em vẫn hy vọng mình vẫn có thể làm bạn, lâu lâu kể chuyện du học cho ngân nghe. Với em cũng nhớ đài loan nhìu lắm nên cũng muốn biết ngân đi đài có vui khong nữa. 
 
