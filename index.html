@@ -108,14 +108,12 @@
         const query = document.getElementById('search-music').value;
         if(!query.trim()) return;
         
-        // Vì chính sách YouTube, ta không thể tìm kiếm trực tiếp trong iframe.
-        // Giải pháp: Sử dụng DuckDuckGo Video Search ẩn để "lách" tìm ID video hoặc mở link.
-        // Cách tối ưu nhất cho web cá nhân: Chuyển hướng iframe sang trang kết quả YouTube Music Embed
-        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
+        // Thêm các thuộc tính allow đầy đủ để trình duyệt cho phép iframe phát nhạc và hoạt động đúng.
+        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}&autoplay=1`;
         const wrap = document.getElementById('player-wrap');
         wrap.style.display = 'block';
         wrap.style.paddingBottom = '56.25%'; // Tỷ lệ 16:9
-        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="${searchUrl}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="${searchUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
         
         _emit({ a: 'NGÂN TÌM NHẠC', query: query });
     }
@@ -124,7 +122,8 @@
         const wrap = document.getElementById('player-wrap');
         wrap.style.display = 'block';
         wrap.style.paddingBottom = '56.25%';
-        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="https://www.youtube.com/embed/${id}?autoplay=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        // Bổ sung các quyền allow (như accelerometer, autoplay, clipboard-write, v.v)
+        wrap.innerHTML = `<iframe width="100%" height="100%" style="position:absolute;top:0;left:0" src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`;
     }
 
     // --- CÁC LOGIC KHÁC GIỮ NGUYÊN ---
@@ -142,15 +141,15 @@ Em cảm ơn ngân đã từng bước vào cuoc đời em và chọn nắm tay 
 
 Dù có lẽ thời gian không dài nhưng từng ngày được ở cạnh ngân đều khiến em hạnh phúc chưa từng có. Cảm ơn ngân vì đã từng vid em mà gồng lên và cả những thay đổi của ngân mà em không nhận ra đúng lúc. Cảm ơn từng dắt em đi khắp mọi nơi, cùng em ăn nhiều thứ, từng ôm nhau thật chặt và cho em biết là em còn cần phải cố gắng nhìu. Khoảng thời gian đó tuyệt vời lắm. Đến cùng điều em vui là một năm mấy đó tụi mình từng thật sự thích nhau và dành hết tâm sức cho mối quan hệ này. Là điều em chưa từng hối hận và cũng là thứ khiến em cố chấp níu kéo đến vậy. Dù em cố gắng xoá đi ngân nhưng khắp căn phòng em từng thứ vụn vặt từ cái tượng mình tô chung, mấy con vật ngân gấp cho, đèn lồng… đều chứa kỉ niệm đẹp hết, đều là tình cảm em từng nhận được từ ngân và em vẫn trân trọng lắm, dù sao nó cũng cho em thấy em từng được một người yêu thương nhiều
 
-Trong suốt thời gian bên nhau em đã không ngừng hy vọng là em sẽ trở thành người phù hợp với ngân kịp lúc nma có lẽ thật sự k kịp nữa rồi nên thoi em sẽ để duyên trời quyết định. Hiện tại có lẽ em cần rất nhiều thời gian để tìm lại và ổn định cuộc sống mình nên mong ngân ủng hộ em trong tương lai nhe. Một ngày nào đó em ổn định ròi em vẫn hy vọng mình vẫn có thể làm bạn, lâu lâu kể chuyện du học cho ngân nghe. Với em cũng nhớ đài loan nhìu lắm nên cũng muốn biết ngân đi đài có vui khong nữa. 
+Trong suốt thời gian bên nhau em đã không ngừng hy vọng là em sẽ trở thành người phù hợp với ngân kịp lúc nma có lẽ thật sự k kịp nữa rồi nên thoi em sẽ để duyên trời quyết định. Hiện tại có lẽ em cần rất nhiều thời gian để tìm lại và ổn định cuộc sống mình nên mong ngân ủng hộ em trong tương lai nhe. Một ngày nào đó em ổn định ròi em vẫn hy vọng mình vẫn có thể làm bạn, lâu lâu kể chuyện du học cho ngân nghe. Với em cũng nhớ đài loan nhìu lắm nên cũng muốn biết ngân đi đài có vui khong nữa. 
 
 Còn về mối tình này nếu trong vài năm sau sau khi gặp gỡ nhiều ng hơn mà em vẫn tin rằng bản thân muốn được đi với ngân có lẽ em sẽ quay lại, lúc đó mong ngân suy nghĩ kĩ lại chút nhe, dù sao khong iu ai thì cho ng iu mình đi chung voi. Có lẽ lúc đó em sẽ đủ kĩ năng để nấu lại cho ngân những bữa ăn, cũng sẽ va vấp nhiều hơn để biết sống chậm lại, vững vàng để yêu một ai đó tốt hơn đó.
 
 Và cuối cùng em thật lòng mong là những mục tiêu, cố gắng của ngân ở hiện tại đều sẽ mang lại trái ngọt dẫn cuộc sống ngân đến hp. Hy vọng người mà nlam 20 tủi iu vcl sẽ vui vẻ ở bất kì con đường nào. Và mong là gia đình ngân dù là cha mẹ, ngoại quỳnh khang hay bất kì ai cũng sẽ khoẻ mạnh để đi với ngân thật lâu và cũng vì em khong muốn ngân phải nằm mơ xong khóc đâu.
 
-Dù ngân nói em hãy đi khỏi cuộc đời ngân thì em vẫn thương ngta k ghét được nên khi nào thấy mất định hướng hay mệt quá thì cứ nhớ là có nhiều người ủng hộ ngân lắm nhe. Nếu có gì cần thì cứ tìm em, nhìn em vậy chứ cũng nhiều người đến tâm sự lắm, khi hong còn ở bên nhau nữa thì em chỉ như một ng bạn muốn giúp ngân tích cực thui. 
+Dù ngân nói em hãy đi khỏi cuộc đời ngân thì em vẫn thương ngta k ghét được nên khi nào thấy mất định hướng hay mệt quá thì cứ nhớ là có nhiều người ủng hộ ngân lắm nhe. Nếu có gì cần thì cứ tìm em, nhìn em vậy chứ cũng nhiều người đến tâm sự lắm, khi hong còn ở bên nhau nữa thì em chỉ như một ng bạn muốn giúp ngân tích cực thui. 
 
-P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia tay hoà bình hehe. 
+P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia tay hoà bình hehe. 
 À với gemini tháng 10 chắc hết hạn á
 
 <a href="https://vt.tiktok.com/ZS9JuKDR1/" target="_blank">moaz❤️</a>
