@@ -121,12 +121,21 @@
     let myPlaylist = [];
     let currentIndex = 0;
     let isShuffle = false;
-    let unplayedIndices = []; // Lưu các bài chưa nghe trong chu kỳ
+    let unplayedIndices = []; // "Hộp bốc thăm" chứa các bài chưa nghe
     let player;
+
+    // Nạp đầy lại hộp bốc thăm
+    function refillUnplayedBox() {
+        unplayedIndices = [];
+        for (let i = 0; i < myPlaylist.length; i++) {
+            unplayedIndices.push(i);
+        }
+    }
 
     function initPlaylist() {
         const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
         myPlaylist = [...defaultSongs, ...savedSongs];
+        refillUnplayedBox();
         renderSelect();
     }
 
@@ -179,11 +188,6 @@
         if (isShuffle) {
             btn.innerText = '🔀 Trộn: Bật';
             btn.classList.add('active');
-            // Khi bật trộn, reset lại mảng chưa nghe (ngoại trừ bài đang phát)
-            unplayedIndices = [];
-            for(let i=0; i<myPlaylist.length; i++) {
-                if (i !== currentIndex) unplayedIndices.push(i);
-            }
         } else {
             btn.innerText = '🔁 Trộn: Tắt';
             btn.classList.remove('active');
@@ -205,7 +209,7 @@
         document.getElementById('playlist').value = index;
         const videoId = myPlaylist[index].id;
         
-        // Loại bỏ bài này khỏi danh sách chưa nghe (nếu đang bật trộn bài)
+        // LUÔN LUÔN loại bỏ bài vừa bật khỏi "hộp bốc thăm" để đánh dấu là đã nghe
         const idxInUnplayed = unplayedIndices.indexOf(index);
         if (idxInUnplayed !== -1) {
             unplayedIndices.splice(idxInUnplayed, 1);
@@ -222,19 +226,25 @@
         if (myPlaylist.length <= 1) return;
         
         if (isShuffle) {
-            // Nếu đã nghe hết sạch các bài, nạp lại toàn bộ danh sách chưa nghe
+            // Nếu hộp bốc thăm đã trống (nghe hết sạch 1 vòng), nạp đầy lại từ đầu
             if (unplayedIndices.length === 0) {
-                for (let i = 0; i < myPlaylist.length; i++) {
-                    if (i !== currentIndex) unplayedIndices.push(i);
-                }
+                refillUnplayedBox();
             }
             
-            // Chọn ngẫu nhiên 1 bài trong danh sách chưa nghe
-            const randomPos = Math.floor(Math.random() * unplayedIndices.length);
-            const nextIndex = unplayedIndices[randomPos];
+            // Bốc ngẫu nhiên 1 bài trong hộp
+            let randomPos = Math.floor(Math.random() * unplayedIndices.length);
+            let nextIndex = unplayedIndices[randomPos];
+            
+            // Tránh lỗi bài đầu vòng mới bị trùng với bài cuối vòng cũ
+            if (nextIndex === currentIndex && unplayedIndices.length > 1) {
+                randomPos = (randomPos + 1) % unplayedIndices.length;
+                nextIndex = unplayedIndices[randomPos];
+            }
+            
             playSong(nextIndex);
             
         } else {
+            // Nghe bình thường (tuần tự)
             let nextIndex = currentIndex + 1;
             if (nextIndex >= myPlaylist.length) {
                 nextIndex = 0; 
@@ -255,11 +265,8 @@
         if (confirmDelete) {
             myPlaylist.splice(currentIndex, 1);
             
-            // Reset lại mảng trộn bài để tránh lỗi index
-            if (isShuffle) {
-                unplayedIndices = [];
-                for(let i=0; i<myPlaylist.length; i++) unplayedIndices.push(i);
-            }
+            // Xóa xong phải nạp lại hộp bốc thăm để tránh lỗi số thứ tự
+            refillUnplayedBox(); 
             
             const savedCustomSongs = myPlaylist.filter(song => song.isCustom);
             localStorage.setItem('ngan_saved_songs', JSON.stringify(savedCustomSongs));
@@ -277,21 +284,21 @@
         }
     }
 
-    // --- 4. THÊM BÀI HÁT NHẬN DIỆN LINK SIÊU NHẠY ---
+    // --- 4. THÊM BÀI HÁT TỪ LINK YOUTUBE BẤT KỲ ---
     function addMusic() {
         const input = document.getElementById('search-music').value.trim();
         if(!input) return;
 
         let videoId = "";
         
-        // Regex bóc tách mã ID video từ mọi loại link (YouTube thường, Shorts, Mobile App, nhúng...)
+        // Regex siêu mạnh: Bóc được mã ID từ link YouTube thường, Shorts, link có đuôi theo dõi...
         const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/gi;
         const match = regex.exec(input);
 
         if (match && match[1]) {
             videoId = match[1];
         } else if (input.length === 11) { 
-            videoId = input; // Phòng hờ lỡ Ngân rành công nghệ copy đúng 11 chữ số
+            videoId = input; 
         } else {
             alert("Ngân chỉ cần copy nguyên cái đường link trên ứng dụng YouTube rồi dán thẳng vào đây là được nha, không cần cắt chữ gì đâu 🥺");
             return;
@@ -300,10 +307,8 @@
         const newSong = { id: videoId, title: "Bài hát Ngân vừa thêm", isCustom: true };
         myPlaylist.push(newSong);
         
-        // Nếu đang trộn bài, thêm ngay bài mới này vào danh sách chưa nghe
-        if (isShuffle) {
-            unplayedIndices.push(myPlaylist.length - 1);
-        }
+        // Thêm bài mới vào hộp bốc thăm để được phát trong vòng nghe hiện tại
+        unplayedIndices.push(myPlaylist.length - 1);
         
         const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
         savedSongs.push(newSong);
