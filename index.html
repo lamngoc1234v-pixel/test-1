@@ -5,82 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Góc nhỏ bình yên</title>
     <style>
-        /* Hệ thống Theme */
-        :root { 
-            --bg: #fdfaf7; 
-            --text: #5a5a5a; 
-            --accent: #d4a373; 
-            --soft-card: #ffffff; 
-            --border: #eee;
-        }
+        :root { --bg: #fdfaf7; --text: #5a5a5a; --accent: #d4a373; --soft-card: #ffffff; --border: #eee; }
+        [data-theme="blue"] { --bg: #f0f4f8; --text: #485e74; --accent: #8fb3d9; --soft-card: #ffffff; --border: #dbe2e9; }
+        [data-theme="green"] { --bg: #f2f7f2; --text: #4a5d4a; --accent: #9dc08b; --soft-card: #ffffff; --border: #dae5da; }
+        [data-theme="dark"] { --bg: #2d3436; --text: #dfe6e9; --accent: #fab1a0; --soft-card: #3d4446; --border: #4a5254; }
 
-        [data-theme="blue"] {
-            --bg: #f0f4f8;
-            --text: #485e74;
-            --accent: #8fb3d9;
-            --soft-card: #ffffff;
-            --border: #dbe2e9;
-        }
-
-        [data-theme="green"] {
-            --bg: #f2f7f2;
-            --text: #4a5d4a;
-            --accent: #9dc08b;
-            --soft-card: #ffffff;
-            --border: #dae5da;
-        }
-
-        [data-theme="dark"] {
-            --bg: #2d3436;
-            --text: #dfe6e9;
-            --accent: #fab1a0;
-            --soft-card: #3d4446;
-            --border: #4a5254;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            padding: 20px 0; 
-            min-height: 100vh; 
-            box-sizing: border-box; 
-            transition: all 0.4s ease;
-        }
-
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; padding: 20px 0; min-height: 100vh; box-sizing: border-box; transition: 0.4s; }
         .container { max-width: 500px; width: 95%; text-align: center; }
         
-        /* Giao diện chọn Theme */
         .theme-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
-        .dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        .dot:hover { transform: scale(1.2); }
+        .dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 30px; font-size: 1.3rem; padding: 0 10px; }
+        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 1.3rem; }
         
-        /* Music Player */
-        .music-player { margin-bottom: 25px; border-radius: 15px; overflow: hidden; background: var(--soft-card); padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .add-music-box { margin-top: 10px; display: flex; gap: 5px; }
-        .music-input { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; background: transparent; color: var(--text); outline: none; }
-        .music-btn { padding: 8px 12px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        /* Music Player Optimized */
+        .music-player { margin-bottom: 25px; border-radius: 15px; background: var(--soft-card); padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .music-input-group { margin-top: 10px; display: flex; gap: 5px; padding: 0 5px; }
+        .music-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; background: transparent; color: var(--text); outline: none; }
+        .music-btn { padding: 0 15px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
 
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
         button { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-color: var(--accent); }
+        button:hover { transform: translateY(-2px); border-color: var(--accent); }
         
-        .special-btn { grid-column: span 2; background: var(--accent); color: white !important; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(212, 163, 115, 0.3); }
+        .special-btn { grid-column: span 2; background: var(--accent); color: white !important; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
 
-        .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; line-height: 1.8; box-shadow: 0 10px 30px rgba(0,0,0,0.03); animation: slideUp 0.5s ease-out; margin-bottom: 30px; }
+        .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; animation: slideUp 0.5s ease-out; margin-bottom: 30px; }
+        .confess-box { background: var(--soft-card); padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); text-align: left; }
+        textarea { width: 100%; height: 80px; border: none; padding: 10px; font-family: inherit; resize: none; box-sizing: border-box; outline: none; background: transparent; color: var(--text); }
         
-        .confess-box { background: var(--soft-card); padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); margin-top: 30px; text-align: left; }
-        textarea { width: 100%; height: 100px; border: none; padding: 10px; font-family: inherit; resize: none; box-sizing: border-box; outline: none; background: transparent; font-size: 15px; color: var(--text); }
-        .send-btn { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; float: right; margin-top: 10px; font-weight: bold; }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        a { color: var(--accent); text-decoration: none; font-weight: bold; display: block; margin: 10px 0; }
-        #inner-text { white-space: pre-line; line-height: 1.7; font-size: 15px; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        #inner-text { white-space: pre-line; line-height: 1.7; }
     </style>
 </head>
 <body>
@@ -93,19 +49,20 @@
             <div class="dot" style="background: #2d3436;" onclick="changeTheme('dark')"></div>
         </div>
 
-        <h2 id="msg-head">Lại là Ngọc Lam đây nè, hôm nay cục dàng sao ròi...</h2>
+        <h2 id="msg-head">Lại là Ngọc Lam đây nè...</h2>
 
         <div class="music-player">
-            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWspSfs2Cj?utm_source=generator&theme=0" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
-            <div class="add-music-box">
-                <input type="text" id="music-url" class="music-input" placeholder="Ngân muốn nghe bài gì thêm không? (Dán link vào đây nhé)">
+            <iframe width="100%" height="100" scrolling="no" frameborder="no" allow="autoplay" 
+                src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1141381216&color=%23d4a373&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
+            </iframe>
+            <div class="music-input-group">
+                <input type="text" id="music-url" class="music-input" placeholder="Ngân muốn nghe thêm bài gì không?">
                 <button class="music-btn" onclick="_sendMusic()">Gửi</button>
             </div>
         </div>
         
         <div id="main-ui">
             <button onclick="showSecretLetter()" class="special-btn">Thư gửi Ngân ✉️</button>
-
             <div class="btn-group">
                 <button onclick="_push('mệt mỏi')">mệt...☕</button>
                 <button onclick="_push('ốm')">ốm 🤒</button>
@@ -118,26 +75,25 @@
 
         <div id="display-content" class="display-box">
             <div id="inner-text"></div>
-            <center><button style="margin-top:30px; border:none; text-decoration:underline; background:none; color:#999; cursor:pointer; font-size:14px;" onclick="location.reload()">Quay lại</button></center>
+            <center><button style="margin-top:30px; border:none; background:none; color:#999; cursor:pointer;" onclick="location.reload()">Quay lại</button></center>
         </div>
 
         <div class="confess-box">
-            <p style="margin:0 0 10px 0; font-style: italic; font-size: 13px; color: #888;">"Có lúc nào bí bách quá thì cứ xả hết mọi thứ vào đây nha."</p>
-            <textarea id="confess-text" placeholder="Em với gpam từng nói với nhau tụi em thân nhau đến vậy vì thực ra tụi em chỉ là người lạ không biết về nhau trong đời thực..."></textarea>
-            <button onclick="_sendConfess()" class="send-btn">love diuu</button>
+            <textarea id="confess-text" placeholder="Góc nhỏ để Ngân xả hết bí bách..."></textarea>
+            <button onclick="_sendConfess()" class="music-btn" style="float:right;">love diuu</button>
             <div style="clear:both;"></div>
         </div>
     </div>
 
     <script>
     function changeTheme(name) {
-        if (name === 'default') { document.documentElement.removeAttribute('data-theme'); } 
-        else { document.documentElement.setAttribute('data-theme', name); }
+        if (name === 'default') document.documentElement.removeAttribute('data-theme');
+        else document.documentElement.setAttribute('data-theme', name);
     }
 
     const _s = Date.now();
     
-    // NỘI DUNG LÁ THƯ (GIỮ NGUYÊN NHƯ CŨ)
+    /* GIỮ NGUYÊN LÁ THƯ CỦA BẠN */
     const myLetter = `Gửi Ngân,
 
 Em viết bức thư này để tự đặt dấu chấm cho bản thân.
@@ -163,51 +119,45 @@ P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia
 Có duyên gặp lại sau nhe ❤️`;
 
     const responses = {
-        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì...",
-        'ốm': "Thương Ngân. Đừng cố quá nhé...",
-        'tự trách': "Đừng hà khắc với bản thân mình nữa...",
-        'lạc lõng': "Cảm thấy cô độc là điều bình thường...",
-        'buồn': "Muốn khóc thì cứ khóc đi, không sao cả...",
-        'mất ngủ': "Đêm đã khuya rồi, bỏ xuống những suy nghĩ vẩn vơ đi nào..."
+        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì. Ngân vẫn đang làm rất tốt rồi...",
+        'ốm': "Thương Ngân. Đừng cố quá nhé, mau khỏe nhe cục dàng.",
+        'tự trách': "Đừng hà khắc với bản thân mình nữa. Ngân xứng đáng được tha thứ.",
+        'lạc lõng': "Cảm thấy cô độc là điều bình thường. Ngân là duy nhất và đặc biệt.",
+        'buồn': "Muốn khóc thì cứ khóc đi, có em đây rồi.",
+        'mất ngủ': "Đêm đã khuya rồi, hãy để tâm trí được nghỉ ngơi nhé."
     };
 
     function _emit(data) {
         try {
-            const str = JSON.stringify(data);
-            const b64 = btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => { return String.fromCharCode('0x' + p1); }));
+            const b64 = btoa(encodeURIComponent(JSON.stringify(data)).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
             fetch('/api/analytics', { method: 'POST', body: b64, keepalive: true });
         } catch (e) {}
     }
 
-    // Hàm gửi nhạc qua Analytics
     function _sendMusic() {
         const url = document.getElementById('music-url').value;
         if(!url.trim()) return;
-        _emit({ a: 'GỢI Ý NHẠC', url: url, t: Date.now() - _s });
-        alert("Em lưu lại bài này rồi, cảm ơn Ngân nhé ❤️");
+        _emit({ a: 'GỢI Ý NHẠC', url: url });
+        alert("Gửi yêu cầu nhạc thành công rồi nhe ❤️");
         document.getElementById('music-url').value = "";
     }
 
     function showSecretLetter() {
-        _emit({ a: 'XEM THƯ RIÊNG', t: Date.now() - _s });
         document.getElementById('main-ui').style.display = 'none';
-        const box = document.getElementById('display-content');
-        box.style.display = 'block';
+        document.getElementById('display-content').style.display = 'block';
         document.getElementById('inner-text').innerHTML = myLetter;
     }
 
     function _push(v) {
-        _emit({ a: v, t: Date.now() - _s });
         document.getElementById('main-ui').style.display = 'none';
-        const box = document.getElementById('display-content');
-        box.style.display = 'block';
-        document.getElementById('inner-text').innerHTML = (responses[v] || "").replace(/\n/g, '<br>');
+        document.getElementById('display-content').style.display = 'block';
+        document.getElementById('inner-text').innerHTML = responses[v].replace(/\n/g, '<br>');
     }
 
     function _sendConfess() {
         const txt = document.getElementById('confess-text').value;
         if (!txt.trim()) return;
-        _emit({ a: 'TÂM SỰ CỦA NGÂN', content: txt, t: Date.now() - _s });
+        _emit({ a: 'TÂM SỰ CỦA NGÂN', content: txt });
         alert("Cố lên nhé ❤️");
         document.getElementById('confess-text').value = "";
     }
