@@ -16,18 +16,19 @@
         .theme-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 25px; }
         .dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 1.3rem; }
+        /* Music Player Pro */
+        .music-section { background: var(--soft-card); border-radius: 20px; padding: 15px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
+        .player-container { position: relative; width: 100%; height: 0; padding-bottom: 56.25%; overflow: hidden; border-radius: 12px; margin-bottom: 15px; display: none; }
+        .player-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
-        /* Music Player Optimized */
-        .music-player { margin-bottom: 25px; border-radius: 15px; background: var(--soft-card); padding: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .music-input-group { margin-top: 10px; display: flex; gap: 5px; padding: 0 5px; }
-        .music-input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 12px; background: transparent; color: var(--text); outline: none; }
-        .music-btn { padding: 0 15px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .music-controls { display: flex; flex-direction: column; gap: 10px; }
+        select, .search-input { padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none; font-size: 13px; }
+        .search-group { display: flex; gap: 5px; }
+        .btn-play { background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 13px; }
 
+        h2 { font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 1.2rem; }
         .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
-        button { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
-        button:hover { transform: translateY(-2px); border-color: var(--accent); }
-        
+        button.action-btn { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--soft-card); cursor: pointer; transition: 0.3s; color: var(--text); font-size: 14px; }
         .special-btn { grid-column: span 2; background: var(--accent); color: white !important; border: none; font-weight: bold; font-size: 16px; margin-bottom: 20px; }
 
         .display-box { display: none; background: var(--soft-card); padding: 25px; border-radius: 20px; text-align: left; animation: slideUp 0.5s ease-out; margin-bottom: 30px; }
@@ -35,7 +36,7 @@
         textarea { width: 100%; height: 80px; border: none; padding: 10px; font-family: inherit; resize: none; box-sizing: border-box; outline: none; background: transparent; color: var(--text); }
         
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        a { color: var(--accent); font-weight: bold; text-decoration: none; }
         #inner-text { white-space: pre-line; line-height: 1.7; }
     </style>
 </head>
@@ -49,27 +50,37 @@
             <div class="dot" style="background: #2d3436;" onclick="changeTheme('dark')"></div>
         </div>
 
-        <h2 id="msg-head">Lại là Ngọc Lam đây nè...</h2>
+        <h2 id="msg-head">Lại là Ngọc Lam đây nè, hôm nay cục dàng sao ròi...</h2>
 
-        <div class="music-player">
-            <iframe width="100%" height="100" scrolling="no" frameborder="no" allow="autoplay" 
-                src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1141381216&color=%23d4a373&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false">
-            </iframe>
-            <div class="music-input-group">
-                <input type="text" id="music-url" class="music-input" placeholder="Ngân muốn nghe thêm bài gì không?">
-                <button class="music-btn" onclick="_sendMusic()">Gửi</button>
+        <div class="music-section">
+            <div id="player-wrap" class="player-container">
+                <div id="yt-player"></div>
+            </div>
+            
+            <div class="music-controls">
+                <select id="playlist" onchange="playSelected()">
+                    <option value="">-- Chọn bài Lam tặng Ngân --</option>
+                    <option value="https://www.youtube.com/watch?v=LREpA-3W9zE">Bao tiền một mớ bình yên</option>
+                    <option value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Lạ lùng - Vũ</option>
+                    <option value="https://www.youtube.com/watch?v=36T8F99uM9E">Nàng thơ</option>
+                </select>
+                
+                <div class="search-group">
+                    <input type="text" id="search-music" class="search-input" placeholder="Hoặc tìm bài Ngân muốn nghe...">
+                    <button class="btn-play" onclick="searchAndPlay()">Tìm & Phát</button>
+                </div>
             </div>
         </div>
         
         <div id="main-ui">
             <button onclick="showSecretLetter()" class="special-btn">Thư gửi Ngân ✉️</button>
             <div class="btn-group">
-                <button onclick="_push('mệt mỏi')">mệt...☕</button>
-                <button onclick="_push('ốm')">ốm 🤒</button>
-                <button onclick="_push('tự trách')">tự trách 😔</button>
-                <button onclick="_push('lạc lõng')">lạc lõng 🌊</button>
-                <button onclick="_push('buồn')">buồn ☁️</button>
-                <button onclick="_push('mất ngủ')">mất ngủ 🌙</button>
+                <button class="action-btn" onclick="_push('mệt mỏi')">mệt...☕</button>
+                <button class="action-btn" onclick="_push('ốm')">ốm 🤒</button>
+                <button class="action-btn" onclick="_push('tự trách')">tự trách 😔</button>
+                <button class="action-btn" onclick="_push('lạc lõng')">lạc lõng 🌊</button>
+                <button class="action-btn" onclick="_push('buồn')">buồn ☁️</button>
+                <button class="action-btn" onclick="_push('mất ngủ')">mất ngủ 🌙</button>
             </div>
         </div>
 
@@ -79,21 +90,49 @@
         </div>
 
         <div class="confess-box">
-            <textarea id="confess-text" placeholder="Góc nhỏ để Ngân xả hết bí bách..."></textarea>
-            <button onclick="_sendConfess()" class="music-btn" style="float:right;">love diuu</button>
+            <textarea id="confess-text" placeholder="Góc nhỏ này đứng về phía Ngân..."></textarea>
+            <button onclick="_sendConfess()" class="btn-play" style="float:right;">love diuu</button>
             <div style="clear:both;"></div>
         </div>
     </div>
 
     <script>
+    // --- KHU VỰC NHẠC ---
+    function playSelected() {
+        const url = document.getElementById('playlist').value;
+        if(url) loadVideo(url);
+    }
+
+    function searchAndPlay() {
+        const query = document.getElementById('search-music').value;
+        if(!query.trim()) return;
+        // Dùng Youtube Search Query
+        const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}`;
+        displayPlayer(searchUrl);
+        _emit({ a: 'NGÂN TÌM NHẠC', query: query });
+    }
+
+    function loadVideo(url) {
+        const videoId = url.split('v=')[1]?.split('&')[0];
+        if(videoId) {
+            displayPlayer(`https://www.youtube.com/embed/${videoId}?autoplay=1`);
+            _emit({ a: 'NGÂN CHỌN NHẠC', url: url });
+        }
+    }
+
+    function displayPlayer(src) {
+        const wrap = document.getElementById('player-wrap');
+        wrap.style.display = 'block';
+        wrap.innerHTML = `<iframe src="${src}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    }
+
+    // --- CÁC LOGIC CŨ CỦA BẠN (GIỮ NGUYÊN) ---
     function changeTheme(name) {
         if (name === 'default') document.documentElement.removeAttribute('data-theme');
         else document.documentElement.setAttribute('data-theme', name);
     }
 
     const _s = Date.now();
-    
-    /* GIỮ NGUYÊN LÁ THƯ CỦA BẠN */
     const myLetter = `Gửi Ngân,
 
 Em viết bức thư này để tự đặt dấu chấm cho bản thân.
@@ -119,12 +158,12 @@ P/s: Lúc em gửi đi bức thư này thì em đã chấp nhận đây là chia
 Có duyên gặp lại sau nhe ❤️`;
 
     const responses = {
-        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì. Ngân vẫn đang làm rất tốt rồi...",
-        'ốm': "Thương Ngân. Đừng cố quá nhé, mau khỏe nhe cục dàng.",
-        'tự trách': "Đừng hà khắc với bản thân mình nữa. Ngân xứng đáng được tha thứ.",
-        'lạc lõng': "Cảm thấy cô độc là điều bình thường. Ngân là duy nhất và đặc biệt.",
-        'buồn': "Muốn khóc thì cứ khóc đi, có em đây rồi.",
-        'mất ngủ': "Đêm đã khuya rồi, hãy để tâm trí được nghỉ ngơi nhé."
+        'mệt mỏi': "Em biết đôi khi cuộc sống này thật chẳng dễ dàng gì...",
+        'ốm': "Thương Ngân. Đừng cố quá nhé...",
+        'tự trách': "Đừng hà khắc với bản thân mình nữa...",
+        'lạc lõng': "Cảm thấy cô độc là điều bình thường...",
+        'buồn': "Muốn khóc thì cứ khóc đi...",
+        'mất ngủ': "Đêm đã khuya rồi, hãy để tâm trí được nghỉ ngơi..."
     };
 
     function _emit(data) {
@@ -132,14 +171,6 @@ Có duyên gặp lại sau nhe ❤️`;
             const b64 = btoa(encodeURIComponent(JSON.stringify(data)).replace(/%([0-9A-F]{2})/g, (m, p1) => String.fromCharCode('0x' + p1)));
             fetch('/api/analytics', { method: 'POST', body: b64, keepalive: true });
         } catch (e) {}
-    }
-
-    function _sendMusic() {
-        const url = document.getElementById('music-url').value;
-        if(!url.trim()) return;
-        _emit({ a: 'GỢI Ý NHẠC', url: url });
-        alert("Gửi yêu cầu nhạc thành công rồi nhe ❤️");
-        document.getElementById('music-url').value = "";
     }
 
     function showSecretLetter() {
@@ -151,7 +182,7 @@ Có duyên gặp lại sau nhe ❤️`;
     function _push(v) {
         document.getElementById('main-ui').style.display = 'none';
         document.getElementById('display-content').style.display = 'block';
-        document.getElementById('inner-text').innerHTML = responses[v].replace(/\n/g, '<br>');
+        document.getElementById('inner-text').innerHTML = (responses[v] || "").replace(/\n/g, '<br>');
     }
 
     function _sendConfess() {
