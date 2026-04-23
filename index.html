@@ -67,6 +67,10 @@
                     <button class="btn-ctrl" onclick="playAll()">▶ Phát tất cả</button>
                     <button id="btn-shuffle" class="btn-ctrl" onclick="toggleShuffle()">🔁 Trộn: Tắt</button>
                 </div>
+                <div class="playback-controls">
+                    <button class="btn-ctrl" onclick="playNext()">⏭ Chuyển bài</button>
+                    <button class="btn-ctrl" onclick="deleteCurrentSong()" style="color: #e74c3c;">🗑 Xóa bài này</button>
+                </div>
 
                 <select id="playlist" onchange="playFromSelect()">
                     </select>
@@ -119,7 +123,7 @@
     let isShuffle = false;
     let player;
 
-    // Khởi tạo danh sách khi tải trang (Lấy từ bộ nhớ cục bộ + Mặc định)
+    // Khởi tạo danh sách khi tải trang
     function initPlaylist() {
         const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
         myPlaylist = [...defaultSongs, ...savedSongs];
@@ -133,9 +137,15 @@
         myPlaylist.forEach((song, index) => {
             const opt = document.createElement('option');
             opt.value = index;
-            opt.text = (index >= defaultSongs.length) ? `💖 ${song.title}` : song.title;
+            // Phân biệt bài mặc định và bài Ngân thêm
+            opt.text = song.isCustom ? `💖 ${song.title}` : song.title;
             select.appendChild(opt);
         });
+        
+        // Đảm bảo thanh select hiển thị đúng bài đang phát
+        if(myPlaylist.length > 0 && document.getElementById('player-wrap').style.display !== 'none') {
+            select.value = currentIndex;
+        }
     }
 
     // --- 2. YOUTUBE PLAYER API ---
@@ -153,7 +163,7 @@
         // Player đã sẵn sàng
     }
 
-    // Nhận biết khi nào bài hát hết để tự chuyển bài
+    // Tự động chuyển bài khi hết nhạc
     function onPlayerStateChange(event) {
         if (event.data === YT.PlayerState.ENDED) {
             playNext();
@@ -164,7 +174,7 @@
     function playAll() {
         if (myPlaylist.length > 0) {
             document.getElementById('player-wrap').style.display = 'block';
-            playSong(0); // Luôn bắt đầu từ bài đầu tiên khi ấn nút này
+            playSong(0); 
             _emit({ a: 'NGÂN ẤN PHÁT TẤT CẢ' });
         }
     }
@@ -190,6 +200,8 @@
     }
 
     function playSong(index) {
+        if (myPlaylist.length === 0) return;
+        
         currentIndex = index;
         document.getElementById('playlist').value = index;
         const videoId = myPlaylist[index].id;
@@ -197,21 +209,20 @@
         if (player && typeof player.loadVideoById === 'function') {
             player.loadVideoById(videoId);
         } else {
-            // Trường hợp API chưa kịp load
             setTimeout(() => playSong(index), 500);
         }
     }
 
     function playNext() {
+        if (myPlaylist.length <= 1) return; // Không chuyển nếu chỉ có 1 bài hoặc trống
+        
         if (isShuffle) {
-            // Chọn ngẫu nhiên 1 bài khác bài hiện tại
             let nextIndex = currentIndex;
-            while (nextIndex === currentIndex && myPlaylist.length > 1) {
+            while (nextIndex === currentIndex) {
                 nextIndex = Math.floor(Math.random() * myPlaylist.length);
             }
             currentIndex = nextIndex;
         } else {
-            // Chuyển bài kế tiếp, nếu hết danh sách thì quay lại bài 1
             currentIndex++;
             if (currentIndex >= myPlaylist.length) {
                 currentIndex = 0; 
@@ -220,7 +231,42 @@
         playSong(currentIndex);
     }
 
-    // --- 4. THÊM BÀI HÁT TỪ LINK VÀ LƯU VĨNH VIỄN ---
+    // Xóa bài hát hiện tại
+    function deleteCurrentSong() {
+        if (myPlaylist.length === 0 || document.getElementById('player-wrap').style.display === 'none') {
+            alert("Hãy chọn và phát một bài hát trước khi xóa nhé!");
+            return;
+        }
+
+        const songName = myPlaylist[currentIndex].title;
+        const confirmDelete = confirm(`Ngân có chắc muốn xóa bài "${songName}" khỏi danh sách không?`);
+        
+        if (confirmDelete) {
+            // Xóa bài khỏi mảng
+            myPlaylist.splice(currentIndex, 1);
+            
+            // Lọc lại danh sách các bài Ngân tự thêm (isCustom = true) để lưu cập nhật vào Local Storage
+            const savedCustomSongs = myPlaylist.filter(song => song.isCustom);
+            localStorage.setItem('ngan_saved_songs', JSON.stringify(savedCustomSongs));
+            
+            renderSelect(); // Vẽ lại menu thả xuống
+            
+            if (myPlaylist.length === 0) {
+                // Nếu xóa hết sạch bài hát
+                document.getElementById('player-wrap').style.display = 'none';
+                if (player && typeof player.stopVideo === 'function') player.stopVideo();
+                alert("Danh sách nhạc hiện tại đã trống.");
+            } else {
+                // Tự động phát bài kế tiếp (hoặc bài đầu tiên nếu xóa bài cuối)
+                if (currentIndex >= myPlaylist.length) {
+                    currentIndex = 0;
+                }
+                playSong(currentIndex);
+            }
+        }
+    }
+
+    // --- 4. THÊM BÀI HÁT TỪ LINK ---
     function addMusic() {
         const input = document.getElementById('search-music').value.trim();
         if(!input) return;
@@ -238,18 +284,15 @@
             return;
         }
 
-        // Tạo bài hát mới
-        const newSong = { id: videoId, title: "Bài hát Ngân vừa thêm" };
+        // Đánh dấu isCustom: true để biết đây là bài Ngân tự thêm
+        const newSong = { id: videoId, title: "Bài hát Ngân vừa thêm", isCustom: true };
         
-        // Cập nhật vào mảng hiện tại
         myPlaylist.push(newSong);
         
-        // Lưu vào Local Storage (chỉ lưu những bài Ngân thêm, không lưu bài mặc định)
         const savedSongs = JSON.parse(localStorage.getItem('ngan_saved_songs')) || [];
         savedSongs.push(newSong);
         localStorage.setItem('ngan_saved_songs', JSON.stringify(savedSongs));
 
-        // Cập nhật giao diện và tự động phát bài vừa thêm
         renderSelect();
         document.getElementById('player-wrap').style.display = 'block';
         playSong(myPlaylist.length - 1);
@@ -258,10 +301,9 @@
         _emit({ a: 'NGÂN THÊM NHẠC MỚI', id: videoId });
     }
 
-    // Chạy hàm khởi tạo danh sách khi mở web
     initPlaylist();
 
-    // --- CÁC HÀM GIAO DIỆN KHÁC GIỮ NGUYÊN ---
+    // --- CÁC HÀM GIAO DIỆN KHÁC ---
     function changeTheme(name) {
         if (name === 'default') document.documentElement.removeAttribute('data-theme');
         else document.documentElement.setAttribute('data-theme', name);
