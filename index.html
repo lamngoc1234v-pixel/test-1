@@ -146,7 +146,7 @@
         myPlaylist.forEach((song, index) => {
             const opt = document.createElement('option');
             opt.value = index;
-            opt.text = song.isCustom ? `💖 ${song.title}` : song.title;
+            opt.text = song.isCustom ? `☆ ${song.title}` : song.title;
             select.appendChild(opt);
         });
         
